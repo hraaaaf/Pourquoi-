@@ -29,3 +29,4 @@ jobs:
           name: p4b3-zerogpu-real-driver
           path: artifacts/p4b3/zerogpu-real-driver.mp4
           if-no-files-found: error
+          # P4-B3 canonical output path verified
