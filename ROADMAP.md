@@ -1,15 +1,28 @@
 # Pourquoi ? — Roadmap
 
 Status: CANONICAL
-Version: 0.1
+Version: 0.2
 
 ## P0 — Canon projet
 Goal: verrouiller les règles produit, contenu, visuel, pipeline et architecture.
 Success: les six fichiers canoniques existent et ne se contredisent pas.
-Preuve: commit/PR P0 auditable.
+Preuve: PR #1 mergée, commit `a23382f1c9dcf59b02f4643513d2515ff487b878`.
 
 ## P1 — Pipeline texte
 Topic → recherche → sources → script → fact-check → storyboard structuré.
+
+### P1-A — Contrat & gates
+- contrats TypeScript ;
+- validation de traçabilité sources → faits → script → storyboard ;
+- fixture ;
+- tests ;
+- CI.
+
+### P1-B — Génération provider-neutral
+- interfaces de génération ;
+- prompts versionnés ;
+- sorties structurées ;
+- aucune sortie ne contourne les gates P1-A.
 
 ## P2 — Voix
 Narration TTS française, qualité, découpage, timings et coût.
@@ -35,8 +48,9 @@ Batch, observabilité, coûts, QA automatisée, catalogue d'épisodes et prépar
 - Les décisions qui modifient un canon doivent être explicites et versionnées.
 
 ## État actuel
-- P0 : IN REVIEW
-- P1–P7 : NOT STARTED
+- P0 : MERGED ✅
+- P1-A : IN PROGRESS
+- P1-B–P7 : NOT STARTED
 
 ## Next exact
-Auditer la PR P0 pour les contradictions restantes. Si le canon est cohérent, merger P0 puis démarrer P1 — Pipeline texte.
+Obtenir un run CI vert sur P1-A, corriger toute défaillance, puis seulement ouvrir P1-B.

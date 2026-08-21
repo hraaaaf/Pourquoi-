@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "episodeId": "fixture-glace-fond",
+    "version": 1
+  },
+  "topic": {
+    "question": "Pourquoi la glace fond-elle quand elle chauffe ?",
+    "minAge": 7,
+    "maxAge": 7,
+    "category": "science",
+    "keyAnswer": "La chaleur donne assez d'énergie aux molécules d'eau pour que la glace passe de l'état solide à l'état liquide."
+  },
+  "research": {
+    "sources": [
+      {
+        "id": "src-1",
+        "title": "Fixture source A",
+        "url": "https://example.com/source-a",
+        "publisher": "Technical fixture"
+      },
+      {
+        "id": "src-2",
+        "title": "Fixture source B",
+        "url": "https://example.com/source-b",
+        "publisher": "Technical fixture"
+      }
+    ],
+    "facts": [
+      {
+        "id": "fact-1",
+        "statement": "La glace est de l'eau à l'état solide.",
+        "sourceIds": ["src-1"]
+      },
+      {
+        "id": "fact-2",
+        "statement": "Quand elle reçoit assez de chaleur, la glace fond et devient liquide.",
+        "sourceIds": ["src-1", "src-2"]
+      }
+    ]
+  },
+  "script": {
+    "targetSeconds": 70,
+    "sections": [
+      {
+        "kind": "hook",
+        "narration": "Tu poses un glaçon sur une table. Quelques minutes plus tard, il devient une petite flaque. Pourquoi ?",
+        "factIds": ["fact-1"]
+      },
+      {
+        "kind": "context",
+        "narration": "Un glaçon, c'est simplement de l'eau qui est devenue solide parce qu'elle était très froide.",
+        "factIds": ["fact-1"]
+      },
+      {
+        "kind": "explanation",
+        "narration": "Quand le glaçon reçoit de la chaleur autour de lui, ses molécules bougent davantage. Avec assez d'énergie, la structure solide se défait et l'eau devient liquide.",
+        "factIds": ["fact-2"]
+      },
+      {
+        "kind": "surprise",
+        "narration": "Le glaçon ne disparaît donc pas. C'est toujours de l'eau, mais dans un autre état.",
+        "factIds": ["fact-1", "fact-2"]
+      },
+      {
+        "kind": "challenge",
+        "narration": "Mini-défi : que se passe-t-il si tu remets cette eau au congélateur ?",
+        "factIds": ["fact-1"]
+      }
+    ]
+  },
+  "factCheck": {
+    "status": "pass",
+    "reviewedFactIds": ["fact-1", "fact-2"]
+  },
+  "storyboard": {
+    "shots": [
+      {
+        "id": "shot-1",
+        "sectionKind": "hook",
+        "purpose": "question",
+        "visual": "Un glaçon sur une table devient progressivement une flaque.",
+        "onScreenText": "Pourquoi la glace fond ?",
+        "factIds": ["fact-1"]
+      },
+      {
+        "id": "shot-2",
+        "sectionKind": "context",
+        "purpose": "recap",
+        "visual": "Transition simple entre eau liquide et glaçon.",
+        "factIds": ["fact-1"]
+      },
+      {
+        "id": "shot-3",
+        "sectionKind": "explanation",
+        "purpose": "cause",
+        "visual": "Schéma simplifié de molécules rangées puis de plus en plus mobiles.",
+        "factIds": ["fact-2"]
+      },
+      {
+        "id": "shot-4",
+        "sectionKind": "surprise",
+        "purpose": "compare",
+        "visual": "Le même symbole H2O apparaît sur le glaçon puis sur la flaque.",
+        "factIds": ["fact-1", "fact-2"]
+      },
+      {
+        "id": "shot-5",
+        "sectionKind": "challenge",
+        "purpose": "question",
+        "visual": "La flaque se transforme en bac à glaçons entrant dans un congélateur.",
+        "factIds": ["fact-1"]
+      }
+    ]
+  }
+}

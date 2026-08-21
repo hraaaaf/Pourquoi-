@@ -1,0 +1,23 @@
+name: P1 Text Pipeline
+
+on:
+  pull_request:
+    paths:
+      - "pipeline/**"
+      - "tests/**"
+      - "episodes/fixtures/**"
+      - "package.json"
+      - "tsconfig.json"
+      - ".github/workflows/p1-text.yml"
+
+jobs:
+  text-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - run: npm run p1:validate

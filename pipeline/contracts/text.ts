@@ -1,0 +1,82 @@
+export const SECTION_KINDS = [
+  "hook",
+  "context",
+  "explanation",
+  "surprise",
+  "challenge",
+] as const;
+
+export type SectionKind = (typeof SECTION_KINDS)[number];
+
+export type EpisodeCategory =
+  | "science"
+  | "history"
+  | "world"
+  | "nature"
+  | "body"
+  | "technology";
+
+export interface TopicContract {
+  question: string;
+  minAge: number;
+  maxAge: number;
+  category: EpisodeCategory;
+  keyAnswer: string;
+}
+
+export interface SourceContract {
+  id: string;
+  title: string;
+  url: string;
+  publisher: string;
+}
+
+export interface FactContract {
+  id: string;
+  statement: string;
+  sourceIds: string[];
+}
+
+export interface ScriptSectionContract {
+  kind: SectionKind;
+  narration: string;
+  factIds: string[];
+}
+
+export interface StoryboardShotContract {
+  id: string;
+  sectionKind: SectionKind;
+  purpose:
+    | "question"
+    | "cause"
+    | "consequence"
+    | "compare"
+    | "surprise"
+    | "recap";
+  visual: string;
+  onScreenText?: string;
+  factIds: string[];
+}
+
+export interface TextBundleContract {
+  metadata: {
+    episodeId: string;
+    version: number;
+  };
+  topic: TopicContract;
+  research: {
+    sources: SourceContract[];
+    facts: FactContract[];
+  };
+  script: {
+    targetSeconds: number;
+    sections: ScriptSectionContract[];
+  };
+  factCheck: {
+    status: "pass" | "fail";
+    reviewedFactIds: string[];
+  };
+  storyboard: {
+    shots: StoryboardShotContract[];
+  };
+}
