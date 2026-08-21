@@ -3,7 +3,7 @@ import base64
 import math
 import shutil
 import subprocess
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 from gradio_client import Client, handle_file
 
 OUT = Path('artifacts/p4b3')
@@ -23,9 +23,14 @@ def restore_reference():
         Path('assets/p4b3/character.part1.b64'),
     ]
     payload = ''.join(p.read_text().strip() for p in parts)
-    REF.write_bytes(base64.b64decode(payload))
+    raw_path = OUT / 'reference-raw.jpg'
+    raw_path.write_bytes(base64.b64decode(payload))
+    with Image.open(raw_path) as im:
+        print(f'reference_raw={im.size[0]}x{im.size[1]}')
+        normalized = ImageOps.fit(im.convert('RGB'), (W, H), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+        normalized.save(REF, format='JPEG', quality=95)
     with Image.open(REF) as im:
-        print(f'reference={im.size[0]}x{im.size[1]}')
+        print(f'reference_normalized={im.size[0]}x{im.size[1]}')
 
 
 def smooth(x):
