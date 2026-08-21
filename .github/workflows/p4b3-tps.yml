@@ -1,0 +1,26 @@
+name: P4-B3 TPS Motion
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tps-motion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install compatible legacy client
+        run: pip install --disable-pip-version-check pillow "gradio_client==0.6.1"
+      - name: Run TPS motion model
+        run: python scripts/p4b3_tps.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4b3-tps-motion
+          path: artifacts/p4b3-tps/tps-motion.mp4
+          if-no-files-found: error
