@@ -1,8 +1,7 @@
 from pathlib import Path
-import base64, hashlib, shutil
+import base64, hashlib, shutil, urllib.request
 from PIL import Image
 from gradio_client import Client, handle_file
-from huggingface_hub import hf_hub_download
 
 SPACE='CVPR/Image-Animation-using-Thin-Plate-Spline-Motion-Model'
 OUT=Path('artifacts/p4b3-tps'); OUT.mkdir(parents=True,exist_ok=True)
@@ -14,14 +13,13 @@ def restore_portrait():
     REF_RAW.write_bytes(base64.b64decode(payload,validate=True))
     raw=REF_RAW.read_bytes(); assert hashlib.sha256(raw).hexdigest()==EXPECTED_SHA
     im=Image.open(REF_RAW).convert('RGB')
-    # Vox model is trained on faces. Keep head and upper torso, square and clean.
     crop=im.crop((45,25,275,255)).resize((256,256),Image.Resampling.LANCZOS)
     crop.save(REF)
     print('TPS_PORTRAIT_OK',REF,crop.size)
 
 def get_driver():
-    src=hf_hub_download(repo_id=SPACE,repo_type='space',filename='assets/driving.mp4')
-    shutil.copy2(src,DRIVE)
+    url='https://raw.githubusercontent.com/yoyo-nb/Thin-Plate-Spline-Motion-Model/main/assets/driving.mp4'
+    urllib.request.urlretrieve(url,DRIVE)
     print('TPS_DRIVER_OK',DRIVE,DRIVE.stat().st_size)
 
 def extract_path(x):
@@ -47,11 +45,8 @@ def main():
     for name,spec in named.items():
         if len(spec.get('parameters',[]))==2:
             endpoint=name; break
-    if endpoint is None:
-        endpoint='/predict'
+    if endpoint is None: endpoint='/predict'
     print('TPS_ENDPOINT',endpoint)
-
-    # Gradio versions differ in Video serialization. Try the simple legacy payload first.
     errors=[]
     for drive_arg in (handle_file(str(DRIVE)), {'video':handle_file(str(DRIVE)),'subtitles':None}):
         try:
