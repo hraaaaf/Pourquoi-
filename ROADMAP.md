@@ -1,7 +1,7 @@
 # Pourquoi ? — Roadmap
 
 Status: CANONICAL
-Version: 0.3
+Version: 0.4
 
 ## P0 — Canon projet
 Goal: verrouiller les règles produit, contenu, visuel, pipeline et architecture.
@@ -20,16 +20,25 @@ MERGED ✅ — PR #2, commit `620ae6a51aa751e6a4f6af928c0177b49d33d7ec`.
 - CI verte : run `32498784961`.
 
 ### P1-B — Génération provider-neutral
-IN PROGRESS.
+MERGED ✅ — PR #3, commit `e5b42bb75c398c1a744590543e99ea6643815055`.
 - interface provider unique ;
 - prompts versionnés ;
 - orchestrateur stage-by-stage ;
 - fact-check bloquant ;
 - gate locale finale non contournable ;
-- aucun provider réel ni secret dans ce lot.
+- CI verte : run `32499125930`.
+
+### P1-C — Operator Mode
+IN REVIEW.
+- ChatGPT réalise le research avec recherche web et sources institutionnelles ;
+- ChatGPT produit script, fact-check et storyboard ;
+- GitHub conserve les artefacts canoniques ;
+- les gates locales et la CI restent l'autorité technique ;
+- premier bundle réel : `episodes/pilot-ciel-bleu/text-bundle.json` ;
+- aucun provider externe ni clé API nécessaire pour le pilote.
 
 ## P2 — Voix
-Narration TTS française, qualité, découpage, timings et coût.
+Narration française, qualité, découpage, timings et coût.
 
 ## P3 — Images
 Génération/gestion des scènes, continuité et identité visuelle.
@@ -54,8 +63,9 @@ Batch, observabilité, coûts, QA automatisée, catalogue d'épisodes et prépar
 ## État actuel
 - P0 : MERGED ✅
 - P1-A : MERGED ✅
-- P1-B : IN PROGRESS
+- P1-B : MERGED ✅
+- P1-C : IN REVIEW
 - P2–P7 : NOT STARTED
 
 ## Next exact
-Pousser P1-B, ouvrir la PR draft et obtenir le run CI. Si vert, P1-B devient créditable ; ensuite seulement choisir/brancher le premier adaptateur provider réel.
+Ouvrir la PR P1-C et obtenir une CI verte sur le bundle pilote réel. Si vert, merger P1-C puis démarrer P2 — Voix sur ce même épisode.

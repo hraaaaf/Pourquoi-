@@ -5,7 +5,7 @@ on:
     paths:
       - "pipeline/**"
       - "tests/**"
-      - "episodes/fixtures/**"
+      - "episodes/**"
       - "package.json"
       - "tsconfig.json"
       - ".github/workflows/p1-text.yml"
@@ -21,3 +21,4 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npm run p1:validate
+      - run: npm run p1:pilot

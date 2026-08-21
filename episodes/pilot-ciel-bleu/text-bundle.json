@@ -1,0 +1,47 @@
+{
+  "metadata": {"episodeId": "pilot-ciel-bleu", "version": 1},
+  "topic": {
+    "question": "Pourquoi le ciel est-il bleu ?",
+    "minAge": 7,
+    "maxAge": 7,
+    "category": "science",
+    "keyAnswer": "Le ciel paraît bleu parce que les molécules de l'atmosphère dispersent très efficacement la lumière bleue du Soleil dans toutes les directions."
+  },
+  "research": {
+    "sources": [
+      {"id": "src-nasa-space-place", "title": "Why Is the Sky Blue?", "url": "https://spaceplace.nasa.gov/blue-sky/en/", "publisher": "NASA Space Place"},
+      {"id": "src-noaa-nesdis", "title": "Why Is the Sky Blue?", "url": "https://www.nesdis.noaa.gov/about/k-12-education/atmosphere/why-the-sky-blue", "publisher": "NOAA NESDIS"},
+      {"id": "src-nasa-glossary", "title": "Universe glossary — Rayleigh scattering", "url": "https://science.nasa.gov/universe/glossary/", "publisher": "NASA Science"}
+    ],
+    "facts": [
+      {"id": "fact-sunlight-colors", "statement": "La lumière du Soleil paraît blanche mais contient les couleurs du spectre visible.", "sourceIds": ["src-nasa-space-place"]},
+      {"id": "fact-blue-shorter", "statement": "La lumière bleue a une longueur d'onde plus courte que la lumière rouge.", "sourceIds": ["src-nasa-space-place"]},
+      {"id": "fact-rayleigh", "statement": "Les molécules de l'atmosphère diffusent les courtes longueurs d'onde plus efficacement, ce qui envoie beaucoup de lumière bleue dans toutes les directions.", "sourceIds": ["src-nasa-space-place", "src-noaa-nesdis", "src-nasa-glossary"]},
+      {"id": "fact-violet", "statement": "Le violet est aussi fortement diffusé, mais nos yeux y sont moins sensibles et une partie est absorbée dans la haute atmosphère, ce qui contribue à notre perception d'un ciel bleu.", "sourceIds": ["src-noaa-nesdis"]},
+      {"id": "fact-sunset", "statement": "Quand le Soleil est bas, sa lumière traverse davantage d'atmosphère ; davantage de bleu est diffusé hors de notre ligne de vue et les rouges et jaunes deviennent plus visibles.", "sourceIds": ["src-nasa-space-place", "src-noaa-nesdis"]}
+    ]
+  },
+  "script": {
+    "targetSeconds": 75,
+    "sections": [
+      {"kind": "hook", "narration": "Tu lèves les yeux : le ciel est bleu. Mais pourquoi bleu ? Pourquoi pas vert, rouge ou violet ?", "factIds": ["fact-rayleigh"]},
+      {"kind": "context", "narration": "Tout commence avec le Soleil. Sa lumière paraît blanche, mais elle contient en réalité toutes les couleurs de l'arc-en-ciel. Et ces couleurs n'ont pas toutes les mêmes longueurs d'onde.", "factIds": ["fact-sunlight-colors", "fact-blue-shorter"]},
+      {"kind": "explanation", "narration": "Quand la lumière entre dans notre atmosphère, elle rencontre de minuscules molécules d'air. Elles dispersent beaucoup plus facilement les couleurs aux petites longueurs d'onde, notamment le bleu. La lumière bleue part alors dans plein de directions et arrive jusqu'à tes yeux depuis presque tout le ciel.", "factIds": ["fact-blue-shorter", "fact-rayleigh", "fact-violet"]},
+      {"kind": "surprise", "narration": "Et le soir, le ciel peut devenir orange ou rouge ! Quand le Soleil est très bas, sa lumière traverse beaucoup plus d'air. Une grande partie du bleu est dispersée avant d'arriver jusqu'à toi, alors les couleurs rouges et jaunes ressortent davantage.", "factIds": ["fact-sunset"]},
+      {"kind": "challenge", "narration": "Mini-défi : demain au coucher du Soleil, regarde sa couleur. Si tu vois de l'orange ou du rouge, tu sauras maintenant pourquoi !", "factIds": ["fact-sunset"]}
+    ]
+  },
+  "factCheck": {
+    "status": "pass",
+    "reviewedFactIds": ["fact-sunlight-colors", "fact-blue-shorter", "fact-rayleigh", "fact-violet", "fact-sunset"]
+  },
+  "storyboard": {
+    "shots": [
+      {"id": "shot-hook", "sectionKind": "hook", "purpose": "question", "visual": "Un personnage-enfant stylisé regarde un grand ciel bleu. Des pastilles vert, rouge et violet apparaissent autour de la question.", "onScreenText": "Pourquoi le ciel est bleu ?", "factIds": ["fact-rayleigh"]},
+      {"id": "shot-context", "sectionKind": "context", "purpose": "compare", "visual": "Un rayon blanc venant du Soleil traverse un prisme et se sépare en couleurs de l'arc-en-ciel. Le bleu est montré avec une onde plus courte que le rouge.", "factIds": ["fact-sunlight-colors", "fact-blue-shorter"]},
+      {"id": "shot-explanation", "sectionKind": "explanation", "purpose": "cause", "visual": "Le rayon solaire entre dans une atmosphère stylisée. Les rayons bleus sont diffusés dans de nombreuses directions par de petites molécules tandis que les rayons rouges continuent plus directement.", "onScreenText": "Le bleu se disperse beaucoup", "factIds": ["fact-rayleigh", "fact-violet"]},
+      {"id": "shot-surprise", "sectionKind": "surprise", "purpose": "consequence", "visual": "Comparaison midi et coucher de soleil : trajet court dans l'atmosphère à midi, trajet beaucoup plus long le soir, avec un ciel orange-rouge près de l'horizon.", "onScreenText": "Et le soir ?", "factIds": ["fact-sunset"]},
+      {"id": "shot-challenge", "sectionKind": "challenge", "purpose": "recap", "visual": "Le personnage observe un coucher de soleil orange et relie le trajet de la lumière à ce qu'il vient d'apprendre.", "onScreenText": "Observe le prochain coucher de soleil", "factIds": ["fact-sunset"]}
+    ]
+  }
+}
