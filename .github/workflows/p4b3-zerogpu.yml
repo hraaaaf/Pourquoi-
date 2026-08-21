@@ -1,0 +1,31 @@
+name: P4-B3 ZeroGPU Wan Animate
+
+on:
+  pull_request:
+    paths:
+      - "scripts/p4b3_zerogpu_smoke.py"
+      - ".github/workflows/p4b3-zerogpu.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  zerogpu-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install client dependencies
+        run: pip install --disable-pip-version-check pillow gradio_client
+      - name: Run free Wan2.2 Animate smoke
+        run: python scripts/p4b3_zerogpu_smoke.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4b3-zerogpu-smoke
+          path: artifacts/p4b3/zerogpu-smoke.mp4
+          if-no-files-found: error
