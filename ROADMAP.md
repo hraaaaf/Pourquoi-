@@ -1,7 +1,7 @@
 # Pourquoi ? — Roadmap
 
 Status: CANONICAL
-Version: 0.4
+Version: 0.5
 
 ## P0 — Canon projet
 Goal: verrouiller les règles produit, contenu, visuel, pipeline et architecture.
@@ -29,16 +29,20 @@ MERGED ✅ — PR #3, commit `e5b42bb75c398c1a744590543e99ea6643815055`.
 - CI verte : run `32499125930`.
 
 ### P1-C — Operator Mode
-IN REVIEW.
-- ChatGPT réalise le research avec recherche web et sources institutionnelles ;
-- ChatGPT produit script, fact-check et storyboard ;
+MERGED ✅ — PR #4, commit `3c603170568c075478aa3ec025be8871483c6b58`.
+- ChatGPT réalise research, script, fact-check et storyboard ;
 - GitHub conserve les artefacts canoniques ;
-- les gates locales et la CI restent l'autorité technique ;
 - premier bundle réel : `episodes/pilot-ciel-bleu/text-bundle.json` ;
+- CI verte : run `32500363852` ;
 - aucun provider externe ni clé API nécessaire pour le pilote.
 
-## P2 — Voix
-Narration française, qualité, découpage, timings et coût.
+## P2 — Voix & musique
+IN REVIEW.
+- narration française `crisp`, direction engagée/curieuse ;
+- bed musical original 75.05 s à 108 BPM ;
+- profil de mix v1 : musique -22 dB sous voix, -16 dB aux transitions ;
+- manifests et tests ajoutés ;
+- human gate audio obligatoire avant merge.
 
 ## P3 — Images
 Génération/gestion des scènes, continuité et identité visuelle.
@@ -64,8 +68,9 @@ Batch, observabilité, coûts, QA automatisée, catalogue d'épisodes et prépar
 - P0 : MERGED ✅
 - P1-A : MERGED ✅
 - P1-B : MERGED ✅
-- P1-C : IN REVIEW
-- P2–P7 : NOT STARTED
+- P1-C : MERGED ✅
+- P2 : IN REVIEW
+- P3–P7 : NOT STARTED
 
 ## Next exact
-Ouvrir la PR P1-C et obtenir une CI verte sur le bundle pilote réel. Si vert, merger P1-C puis démarrer P2 — Voix sur ce même épisode.
+Obtenir CI verte sur P2 puis human gate voix + musique. Si validé, merger P2 et démarrer P3 — Images sur les 5 plans du storyboard pilote.
