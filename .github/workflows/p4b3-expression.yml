@@ -12,18 +12,20 @@ permissions:
 jobs:
   expression:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Install client dependencies
         run: pip install --disable-pip-version-check pillow gradio_client
-      - name: Run Advanced LivePortrait Expression Editor
+      - name: Generate LivePortrait keyframes and microclip
         run: python scripts/p4b3_expression.py
       - uses: actions/upload-artifact@v4
         with:
-          name: p4b3-expression
-          path: artifacts/p4b3-expression/surprise-up.png
+          name: p4b3-expression-microclip
+          path: artifacts/p4b3-expression/
           if-no-files-found: error
