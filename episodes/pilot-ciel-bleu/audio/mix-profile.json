@@ -1,0 +1,15 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "version": 1,
+  "voiceDb": 0,
+  "musicUnderVoiceDb": -22,
+  "musicTransitionDb": -16,
+  "ducking": {
+    "enabled": true,
+    "attackMs": 80,
+    "releaseMs": 260
+  },
+  "loudnessTargetLufs": -16,
+  "truePeakDb": -1,
+  "notes": "Voice remains dominant. Music rises only between semantic sections and on the final challenge."
+}
