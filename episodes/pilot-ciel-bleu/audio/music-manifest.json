@@ -1,0 +1,21 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "version": 1,
+  "status": "human-review",
+  "origin": "original-generated-in-chat",
+  "durationSeconds": 75.049796,
+  "bpm": 108,
+  "style": "light-curious-cinematic",
+  "harmonicCycle": ["C", "Am", "F", "G"],
+  "elements": ["warm-pad", "soft-plucks", "transition-sparkles", "soft-pulse"],
+  "transitionMarksSeconds": [0, 12.5, 28, 50, 65],
+  "files": {
+    "preview": "pilot-ciel-bleu-music-preview-30s.mp3",
+    "full": "pilot-ciel-bleu-music-bed.mp3"
+  },
+  "humanGate": {
+    "fitForKids": "pending",
+    "notDistracting": "pending",
+    "energy": "pending"
+  }
+}
