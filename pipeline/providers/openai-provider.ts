@@ -5,7 +5,6 @@ import { zodTextFormat } from "openai/helpers/zod";
 import type { ZodType } from "zod/v4";
 import {
   FactCheckOutputSchema,
-  ResearchOutputSchema,
   ScriptOutputSchema,
   StoryboardOutputSchema,
 } from "../contracts/text-schema.js";
@@ -65,6 +64,10 @@ export class OpenAITextProvider implements TextProvider {
   }
 
   async generateJson(request: TextGenerationRequest): Promise<unknown> {
+    if (request.stage === "research") {
+      throw new Error("OPENAI_RESEARCH_DISABLED: research is operator-supplied");
+    }
+
     const instructions = await this.promptLoader(request.promptId);
     const common = {
       model: this.model,
@@ -76,15 +79,13 @@ export class OpenAITextProvider implements TextProvider {
     };
 
     switch (request.stage) {
-      case "research":
-        return this.run(common, ResearchOutputSchema, "research_contract", true);
       case "script":
-        return this.run(common, ScriptOutputSchema, "script_contract", false);
+        return this.run(common, ScriptOutputSchema, "script_contract");
       case "fact-check":
-        return this.run(common, FactCheckOutputSchema, "fact_check_contract", false);
+        return this.run(common, FactCheckOutputSchema, "fact_check_contract");
       case "storyboard":
         return normalizeStoryboard(
-          await this.run(common, StoryboardOutputSchema, "storyboard_contract", false),
+          await this.run(common, StoryboardOutputSchema, "storyboard_contract"),
         );
     }
   }
@@ -93,12 +94,10 @@ export class OpenAITextProvider implements TextProvider {
     common: Record<string, unknown>,
     schema: ZodType,
     formatName: string,
-    webSearch: boolean,
   ): Promise<unknown> {
     const response = await this.client.responses.parse({
       ...common,
       text: { format: zodTextFormat(schema, formatName) },
-      ...(webSearch ? { tools: [{ type: "web_search" }] } : {}),
     });
 
     if (response.output_parsed == null) {
