@@ -1,0 +1,17 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "version": 2,
+  "status": "human-review",
+  "engine": "AI_Voice_Generator",
+  "contextId": "39c053c6223a47d4a998e36c583cb5fa",
+  "voiceId": "crisp",
+  "direction": "engaged-curious",
+  "language": "fr-FR",
+  "targetAudience": "6-9",
+  "transcript": "Tu lèves les yeux. Le ciel est bleu. Mais attends… pourquoi bleu ? Pourquoi pas vert, rouge ou violet ? Tout commence avec le Soleil. Sa lumière paraît blanche, mais elle contient en réalité toutes les couleurs de l’arc-en-ciel. Et ces couleurs ne voyagent pas exactement de la même façon. Quand la lumière entre dans notre atmosphère, elle rencontre de minuscules molécules d’air. Et là… ça part dans tous les sens ! Les couleurs aux petites longueurs d’onde, surtout le bleu, sont beaucoup plus dispersées. Résultat : de la lumière bleue arrive jusqu’à tes yeux depuis presque tout le ciel. Voilà pourquoi il nous paraît bleu ! Mais le soir, surprise : le ciel peut devenir orange ou rouge. Quand le Soleil est très bas, sa lumière traverse beaucoup plus d’air. Une grande partie du bleu est dispersée avant de t’atteindre, et les couleurs rouges et jaunes ressortent davantage. Mini-défi : demain, regarde le coucher du Soleil. Si tu vois du rouge ou de l’orange… tu sauras pourquoi !",
+  "humanGate": {
+    "engagement": "pending",
+    "clarity": "pending",
+    "pace": "pending"
+  }
+}
