@@ -1,4 +1,5 @@
 from pathlib import Path
+import base64
 import math
 import shutil
 import subprocess
@@ -7,91 +8,128 @@ from gradio_client import Client, handle_file
 
 OUT = Path('artifacts/p4b3')
 OUT.mkdir(parents=True, exist_ok=True)
-REF = OUT / 'reference.png'
+REF = OUT / 'reference.jpg'
 DRIVE = OUT / 'driving.mp4'
 RESULT = OUT / 'zerogpu-smoke.mp4'
 
 W, H = 384, 480
+FPS = 24
+SECONDS = 3.0
 
 
-def draw_character(path: Path):
-    im = Image.new('RGB', (W, H), (105, 190, 245))
+def restore_reference():
+    parts = [
+        Path('assets/p4b3/character.part0.b64'),
+        Path('assets/p4b3/character.part1.b64'),
+    ]
+    payload = ''.join(p.read_text().strip() for p in parts)
+    REF.write_bytes(base64.b64decode(payload))
+    with Image.open(REF) as im:
+        print(f'reference={im.size[0]}x{im.size[1]}')
+
+
+def smooth(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3.0 - 2.0 * x)
+
+
+def lerp(a, b, t):
+    return a + (b - a) * t
+
+
+def pose(t):
+    keys = [
+        (0.00, -45, 295, 20, 10, 0.0),
+        (0.55, 190, 290, 25, 15, 0.2),
+        (1.05, 195, 286, 35, 20, 0.5),
+        (1.55, 198, 282, -35, -10, 0.75),
+        (2.10, 200, 278, -72, -6, 1.0),
+        (2.55, 200, 268, -82, -3, 1.0),
+        (3.00, 200, 278, -72, -6, 1.0),
+    ]
+    if t <= keys[0][0]:
+        return keys[0][1:]
+    for a, b in zip(keys, keys[1:]):
+        if a[0] <= t <= b[0]:
+            u = smooth((t - a[0]) / (b[0] - a[0]))
+            return tuple(lerp(a[i], b[i], u) for i in range(1, len(a)))
+    return keys[-1][1:]
+
+
+def endpoint(p, length, deg):
+    r = math.radians(deg)
+    return p[0] + length * math.cos(r), p[1] + length * math.sin(r)
+
+
+def driver_frame(t):
+    cx, cy, right_angle, left_angle, expr = pose(t)
+    im = Image.new('RGB', (W, H), (238, 240, 244))
     d = ImageDraw.Draw(im)
-    d.ellipse((15, 15, 90, 90), fill=(255, 240, 160))
-    d.rectangle((0, 360, W, H), fill=(90, 180, 80))
-    # legs
-    d.line((175, 350, 155, 440), fill=(40, 70, 120), width=28)
-    d.line((215, 350, 240, 440), fill=(40, 70, 120), width=28)
-    # red hoodie torso
-    d.rounded_rectangle((120, 180, 270, 360), radius=38, fill=(220, 40, 35))
-    # head + hair
-    d.ellipse((130, 75, 260, 210), fill=(248, 176, 120))
-    d.polygon([(130,120),(145,78),(180,60),(220,66),(260,105),(235,90),(215,112),(190,85),(165,115)], fill=(75,45,30))
-    # eyes + smile
-    d.ellipse((160,125,180,150), fill='white'); d.ellipse((210,125,230,150), fill='white')
-    d.ellipse((167,132,176,143), fill=(40,25,20)); d.ellipse((217,132,226,143), fill=(40,25,20))
-    d.arc((175,145,220,185), 10, 170, fill=(90,30,25), width=5)
-    # pointing arm
-    d.line((245,220,320,125), fill=(220,40,35), width=34)
-    d.ellipse((306,105,334,135), fill=(248,176,120))
-    d.line((322,119,330,75), fill=(248,176,120), width=12)
-    # other arm
-    d.line((130,225,75,280), fill=(220,40,35), width=34)
-    im.save(path)
-
-
-def draw_driver_frame(t: float) -> Image.Image:
-    im = Image.new('RGB', (W, H), (30, 45, 80))
-    d = ImageDraw.Draw(im)
-    cx = 192 + 10 * math.sin(t * math.pi * 2)
-    cy = 235 + 8 * math.sin(t * math.pi * 4)
-    # head
-    d.ellipse((cx-45, cy-145, cx+45, cy-55), fill=(230,180,140))
-    # torso
-    d.rounded_rectangle((cx-55, cy-55, cx+55, cy+85), radius=24, fill=(220,40,35))
-    # legs
-    d.line((cx-25, cy+80, cx-50, cy+180), fill='white', width=18)
-    d.line((cx+25, cy+80, cx+55, cy+180), fill='white', width=18)
-    # left arm swings; right arm raises and points
-    a = -1.2 + 0.65 * math.sin(t * math.pi)
-    x2 = cx + math.cos(a) * 115; y2 = cy-25 + math.sin(a) * 115
-    d.line((cx+35, cy-30, x2, y2), fill=(245,180,140), width=18)
-    d.line((x2, y2, x2+8, y2-45), fill=(245,180,140), width=10)
-    b = 2.6 + 0.4 * math.sin(t * math.pi * 2)
-    lx = cx + math.cos(b) * 95; ly = cy-20 + math.sin(b) * 95
-    d.line((cx-35, cy-25, lx, ly), fill=(245,180,140), width=18)
+    d.ellipse((cx - 60, 432, cx + 60, 450), fill=(210, 213, 220))
+    d.rounded_rectangle((cx - 42, cy - 55, cx + 42, cy + 70), radius=20, fill=(218, 45, 38))
+    d.ellipse((cx - 38, cy - 142, cx + 38, cy - 66), fill=(241, 184, 139))
+    d.pieslice((cx - 40, cy - 150, cx + 40, cy - 78), 180, 360, fill=(69, 42, 30))
+    ey = cy - 108 - 5 * expr
+    for ex in (-14, 14):
+        d.ellipse((cx + ex - 5, ey - 4, cx + ex + 5, ey + 6), fill='white')
+        d.ellipse((cx + ex - 1, ey - 2, cx + ex + 4, ey + 4), fill=(30, 25, 22))
+    if expr < 0.45:
+        d.arc((cx - 12, cy - 90, cx + 12, cy - 70), 10, 170, fill=(100, 45, 40), width=3)
+    else:
+        d.ellipse((cx - 12, cy - 90, cx + 12, cy - 68), fill=(90, 35, 35))
+    rs = (cx + 38, cy - 35)
+    re = endpoint(rs, 68, right_angle)
+    rh = endpoint(re, 62, right_angle - 8)
+    ls = (cx - 38, cy - 35)
+    le = endpoint(ls, 62, 180 - left_angle)
+    lh = endpoint(le, 58, 180 - left_angle + 8)
+    for a, b in ((rs, re), (re, rh), (ls, le), (le, lh)):
+        d.line((a[0], a[1], b[0], b[1]), fill=(226, 70, 55), width=17)
+    for p in (re, rh, le, lh):
+        d.ellipse((p[0]-8, p[1]-8, p[0]+8, p[1]+8), fill=(241, 184, 139))
+    if t > 1.45:
+        finger = endpoint(rh, 27, right_angle - 25)
+        d.line((rh[0], rh[1], finger[0], finger[1]), fill=(241, 184, 139), width=7)
+    bounce = 10 * max(0.0, 1.0 - abs(t - 2.55) / 0.35)
+    lk = (cx - 18, cy + 145 - bounce)
+    rk = (cx + 22, cy + 145 - bounce * 0.7)
+    lf = (cx - 28, 425)
+    rf = (cx + 34, 425)
+    for a, b in (((cx-20, cy+62), lk), (lk, lf), ((cx+20, cy+62), rk), (rk, rf)):
+        d.line((a[0], a[1], b[0], b[1]), fill=(48, 68, 112), width=21)
+    d.ellipse((lf[0]-18, lf[1]-5, lf[0]+22, lf[1]+10), fill=(215, 65, 55))
+    d.ellipse((rf[0]-18, rf[1]-5, rf[0]+22, rf[1]+10), fill=(215, 65, 55))
     return im
 
 
 def make_driver():
     frame_dir = OUT / 'driver_frames'
     frame_dir.mkdir(exist_ok=True)
-    fps = 24
-    seconds = 2.0
-    for i in range(int(fps * seconds)):
-        draw_driver_frame(i/(fps*seconds)).save(frame_dir / f'{i:04d}.png')
+    for i in range(int(FPS * SECONDS)):
+        driver_frame(i / FPS).save(frame_dir / f'{i:04d}.png')
     subprocess.run([
-        'ffmpeg','-y','-loglevel','error','-framerate',str(fps),'-i',str(frame_dir/'%04d.png'),
-        '-c:v','libx264','-pix_fmt','yuv420p','-crf','24',str(DRIVE)
+        'ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS),
+        '-i', str(frame_dir / '%04d.png'), '-c:v', 'libx264', '-pix_fmt',
+        'yuv420p', '-crf', '21', '-r', str(FPS), str(DRIVE)
     ], check=True)
 
 
 def main():
-    draw_character(REF)
+    restore_reference()
     make_driver()
     client = Client('hugging-apps/wan2-2-animate-2-14b')
     output = client.predict(
         handle_file(str(REF)),
         handle_file(str(DRIVE)),
-        'cheerful 2D educational cartoon boy in a red hoodie, blue sky background, curious energetic expression, smooth natural character motion',
-        2.0, 480, 384, 6, 1.0, 5.0,
-        'static frame, blurry details, distorted face, extra limbs, extra fingers, text, subtitles, watermark',
-        0,
+        'same cheerful young cartoon boy, red hoodie, blue jeans and red sneakers, preserve face and clothing identity, he enters frame, looks upward with curiosity, becomes surprised, raises one arm, points upward with one finger, then makes a small energetic bounce, smooth natural full-body animation, clean neutral background',
+        3.0, 480, 384, 8, 1.0, 5.5,
+        'distorted face, identity drift, extra limbs, extra fingers, duplicated body parts, warped hands, text, subtitles, watermark, static frame, flicker, blur',
+        23,
         api_name='/animate',
     )
     src = Path(output if isinstance(output, str) else output[0])
     shutil.copy2(src, RESULT)
-    print(f'P4-B3 ZERO-GPU PASS: {RESULT}')
+    print(f'P4-B3 REAL CHARACTER PASS: {RESULT}')
 
 
 if __name__ == '__main__':
