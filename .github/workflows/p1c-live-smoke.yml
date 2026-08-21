@@ -1,0 +1,41 @@
+name: P1-C Live OpenAI Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: OpenAI text model
+        required: true
+        default: gpt-5.6-luna
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  live-text-smoke:
+    runs-on: ubuntu-latest
+    env:
+      TEXT_PROVIDER: openai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_TEXT_MODEL: ${{ inputs.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - name: Require OpenAI secret
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::Repository secret OPENAI_API_KEY is required for the live smoke test."
+            exit 1
+          fi
+      - name: Generate live text bundle
+        run: npm run p1c:live
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p1c-live-text-bundle
+          path: artifacts/p1c/live-bundle.json
+          if-no-files-found: error
