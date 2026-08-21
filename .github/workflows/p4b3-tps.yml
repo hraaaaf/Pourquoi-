@@ -1,10 +1,7 @@
 name: P4-B3 TPS Motion
 
 on:
-  pull_request:
-    paths:
-      - "scripts/p4b3_tps.py"
-      - ".github/workflows/p4b3-tps.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
