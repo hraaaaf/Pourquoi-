@@ -26,6 +26,6 @@ jobs:
         run: python scripts/p4b3_zerogpu_smoke.py
       - uses: actions/upload-artifact@v4
         with:
-          name: p4b3-zerogpu-smoke
-          path: artifacts/p4b3/zerogpu-smoke.mp4
+          name: p4b3-zerogpu-real-driver
+          path: artifacts/p4b3/zerogpu-real-driver.mp4
           if-no-files-found: error
