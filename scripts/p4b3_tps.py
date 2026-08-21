@@ -26,9 +26,12 @@ def extract_path(x):
     if isinstance(x,str): return x
     if isinstance(x,dict):
         if x.get('path'): return x['path']
+        if x.get('name') and x.get('is_file'): return x['name']
         v=x.get('video')
         if isinstance(v,str): return v
-        if isinstance(v,dict) and v.get('path'): return v['path']
+        if isinstance(v,dict):
+            if v.get('path'): return v['path']
+            if v.get('name') and v.get('is_file'): return v['name']
     if isinstance(x,(list,tuple)):
         for y in x:
             p=extract_path(y)
@@ -40,17 +43,15 @@ def main():
     c=Client(SPACE)
     info=c.view_api(return_format='dict')
     print('TPS_API_INFO',info)
-    named=info.get('named_endpoints',{}) if isinstance(info,dict) else {}
-    endpoint=None
-    for name,spec in named.items():
-        if len(spec.get('parameters',[]))==2:
-            endpoint=name; break
-    if endpoint is None: endpoint='/predict'
-    print('TPS_ENDPOINT',endpoint)
+    print('TPS_ENDPOINT fn_index=2')
     errors=[]
-    for drive_arg in (handle_file(str(DRIVE)), {'video':handle_file(str(DRIVE)),'subtitles':None}):
+    # Legacy Gradio endpoint: predict(image, video, fn_index=2).
+    for img_arg,drive_arg in (
+        (handle_file(str(REF)),handle_file(str(DRIVE))),
+        (str(REF),str(DRIVE)),
+    ):
         try:
-            out=c.predict(handle_file(str(REF)),drive_arg,api_name=endpoint)
+            out=c.predict(img_arg,drive_arg,fn_index=2)
             print('TPS_RAW_OUTPUT',out)
             p=extract_path(out)
             if not p: raise RuntimeError(f'No video path in output: {out!r}')
