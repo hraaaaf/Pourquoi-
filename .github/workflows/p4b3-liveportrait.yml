@@ -1,10 +1,7 @@
 name: P4-B3 LivePortrait ZeroGPU
 
 on:
-  pull_request:
-    paths:
-      - "scripts/p4b3_liveportrait.py"
-      - ".github/workflows/p4b3-liveportrait.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read

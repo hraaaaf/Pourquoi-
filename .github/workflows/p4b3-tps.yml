@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install client dependencies
-        run: pip install --disable-pip-version-check pillow gradio_client
+      - name: Install compatible legacy client
+        run: pip install --disable-pip-version-check pillow "gradio_client==0.6.1"
       - name: Run TPS motion model
         run: python scripts/p4b3_tps.py
       - uses: actions/upload-artifact@v4

@@ -1,10 +1,7 @@
 name: P4-B3 ZeroGPU Wan Animate
 
 on:
-  pull_request:
-    paths:
-      - "scripts/p4b3_zerogpu_smoke.py"
-      - ".github/workflows/p4b3-zerogpu.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,4 +26,3 @@ jobs:
           name: p4b3-zerogpu-real-driver
           path: artifacts/p4b3/zerogpu-real-driver.mp4
           if-no-files-found: error
-          # P4-B3 canonical output path verified

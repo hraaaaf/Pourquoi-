@@ -1,7 +1,7 @@
 from pathlib import Path
 import base64, hashlib, shutil, urllib.request
 from PIL import Image
-from gradio_client import Client, handle_file
+from gradio_client import Client
 
 SPACE='CVPR/Image-Animation-using-Thin-Plate-Spline-Motion-Model'
 OUT=Path('artifacts/p4b3-tps'); OUT.mkdir(parents=True,exist_ok=True)
@@ -26,12 +26,7 @@ def extract_path(x):
     if isinstance(x,str): return x
     if isinstance(x,dict):
         if x.get('path'): return x['path']
-        if x.get('name') and x.get('is_file'): return x['name']
-        v=x.get('video')
-        if isinstance(v,str): return v
-        if isinstance(v,dict):
-            if v.get('path'): return v['path']
-            if v.get('name') and v.get('is_file'): return v['name']
+        if x.get('name'): return x['name']
     if isinstance(x,(list,tuple)):
         for y in x:
             p=extract_path(y)
@@ -41,25 +36,12 @@ def extract_path(x):
 def main():
     restore_portrait(); get_driver()
     c=Client(SPACE)
-    info=c.view_api(return_format='dict')
-    print('TPS_API_INFO',info)
     print('TPS_ENDPOINT fn_index=2')
-    errors=[]
-    # Legacy Gradio endpoint: predict(image, video, fn_index=2).
-    for img_arg,drive_arg in (
-        (handle_file(str(REF)),handle_file(str(DRIVE))),
-        (str(REF),str(DRIVE)),
-    ):
-        try:
-            out=c.predict(img_arg,drive_arg,fn_index=2)
-            print('TPS_RAW_OUTPUT',out)
-            p=extract_path(out)
-            if not p: raise RuntimeError(f'No video path in output: {out!r}')
-            shutil.copy2(Path(p),RESULT)
-            print('TPS_PASS',RESULT,RESULT.stat().st_size)
-            return
-        except Exception as e:
-            errors.append(repr(e)); print('TPS_ATTEMPT_FAIL',repr(e))
-    raise RuntimeError(' | '.join(errors))
+    out=c.predict(str(REF),str(DRIVE),fn_index=2)
+    print('TPS_RAW_OUTPUT',out)
+    p=extract_path(out)
+    if not p: raise RuntimeError(f'No video path in output: {out!r}')
+    shutil.copy2(Path(p),RESULT)
+    print('TPS_PASS',RESULT,RESULT.stat().st_size)
 
 if __name__=='__main__': main()
