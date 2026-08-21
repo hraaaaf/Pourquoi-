@@ -37,10 +37,25 @@ export interface FactContract {
   sourceIds: string[];
 }
 
+export interface ResearchContract {
+  sources: SourceContract[];
+  facts: FactContract[];
+}
+
 export interface ScriptSectionContract {
   kind: SectionKind;
   narration: string;
   factIds: string[];
+}
+
+export interface ScriptContract {
+  targetSeconds: number;
+  sections: ScriptSectionContract[];
+}
+
+export interface FactCheckContract {
+  status: "pass" | "fail";
+  reviewedFactIds: string[];
 }
 
 export interface StoryboardShotContract {
@@ -58,25 +73,18 @@ export interface StoryboardShotContract {
   factIds: string[];
 }
 
+export interface StoryboardContract {
+  shots: StoryboardShotContract[];
+}
+
 export interface TextBundleContract {
   metadata: {
     episodeId: string;
     version: number;
   };
   topic: TopicContract;
-  research: {
-    sources: SourceContract[];
-    facts: FactContract[];
-  };
-  script: {
-    targetSeconds: number;
-    sections: ScriptSectionContract[];
-  };
-  factCheck: {
-    status: "pass" | "fail";
-    reviewedFactIds: string[];
-  };
-  storyboard: {
-    shots: StoryboardShotContract[];
-  };
+  research: ResearchContract;
+  script: ScriptContract;
+  factCheck: FactCheckContract;
+  storyboard: StoryboardContract;
 }
