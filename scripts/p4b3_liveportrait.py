@@ -13,7 +13,6 @@ def restore_and_crop():
     REF_RAW.write_bytes(base64.b64decode(payload,validate=True))
     raw=REF_RAW.read_bytes(); sha=hashlib.sha256(raw).hexdigest(); assert sha==EXPECTED_SHA
     im=Image.open(REF_RAW).convert('RGB')
-    # Tight portrait crop: keep head + shoulders and upscale for face motion fidelity.
     crop=im.crop((55,35,265,285)).resize((512,512),Image.Resampling.LANCZOS)
     crop.save(REF)
     print('PORTRAIT_OK',REF,crop.size)
@@ -23,33 +22,29 @@ def get_driver():
     shutil.copy2(src,DRIVE)
     print('LIVEPORTRAIT_DRIVER_OK',DRIVE,DRIVE.stat().st_size)
 
-def pick_endpoint(client):
-    info=client.view_api(return_format='dict')
-    print('API_INFO',info)
-    named=info.get('named_endpoints',{}) if isinstance(info,dict) else {}
-    # Animation endpoint has 5 inputs: source portrait, driving video, relative, crop, paste-back.
-    for name,spec in named.items():
-        params=spec.get('parameters',[]) if isinstance(spec,dict) else []
-        if len(params)==5:
-            return name
-    for candidate in ('/gpu_wrapped_execute_video','/predict','/animate'):
-        if candidate in named:
-            return candidate
-    raise RuntimeError(f'No LivePortrait animation endpoint found: {list(named)}')
+def video_path_from(x):
+    if isinstance(x,str): return x
+    if isinstance(x,dict):
+        if x.get('path'): return x['path']
+        video=x.get('video')
+        if isinstance(video,str): return video
+        if isinstance(video,dict) and video.get('path'): return video['path']
+    return None
 
 def main():
     restore_and_crop(); get_driver()
     c=Client('KlingTeam/LivePortrait')
-    endpoint=pick_endpoint(c)
+    endpoint='/gpu_wrapped_execute_video'
     print('LIVEPORTRAIT_ENDPOINT',endpoint)
-    out=c.predict(handle_file(str(REF)),handle_file(str(DRIVE)),True,True,True,api_name=endpoint)
+    # Gradio Video component expects VideoData, not a bare filepath.
+    drive_data={'video': handle_file(str(DRIVE)), 'subtitles': None}
+    out=c.predict(handle_file(str(REF)),drive_data,True,True,True,api_name=endpoint)
     print('RAW_OUTPUT',out)
     candidates=[]
-    if isinstance(out,str): candidates=[out]
-    elif isinstance(out,(list,tuple)):
-        for x in out:
-            if isinstance(x,str): candidates.append(x)
-            elif isinstance(x,dict) and x.get('path'): candidates.append(x['path'])
+    seq=out if isinstance(out,(list,tuple)) else [out]
+    for x in seq:
+        p=video_path_from(x)
+        if p: candidates.append(p)
     if not candidates: raise RuntimeError(f'No video path in output: {out!r}')
     src=Path(candidates[0]); shutil.copy2(src,RESULT)
     print('LIVEPORTRAIT_PASS',RESULT,RESULT.stat().st_size)
