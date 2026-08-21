@@ -1,7 +1,7 @@
 # Pourquoi ? — Roadmap
 
 Status: CANONICAL
-Version: 0.2
+Version: 0.3
 
 ## P0 — Canon projet
 Goal: verrouiller les règles produit, contenu, visuel, pipeline et architecture.
@@ -12,17 +12,21 @@ Preuve: PR #1 mergée, commit `a23382f1c9dcf59b02f4643513d2515ff487b878`.
 Topic → recherche → sources → script → fact-check → storyboard structuré.
 
 ### P1-A — Contrat & gates
+MERGED ✅ — PR #2, commit `620ae6a51aa751e6a4f6af928c0177b49d33d7ec`.
 - contrats TypeScript ;
 - validation de traçabilité sources → faits → script → storyboard ;
 - fixture ;
-- tests ;
-- CI.
+- tests positifs/négatifs ;
+- CI verte : run `32498784961`.
 
 ### P1-B — Génération provider-neutral
-- interfaces de génération ;
+IN PROGRESS.
+- interface provider unique ;
 - prompts versionnés ;
-- sorties structurées ;
-- aucune sortie ne contourne les gates P1-A.
+- orchestrateur stage-by-stage ;
+- fact-check bloquant ;
+- gate locale finale non contournable ;
+- aucun provider réel ni secret dans ce lot.
 
 ## P2 — Voix
 Narration TTS française, qualité, découpage, timings et coût.
@@ -49,8 +53,9 @@ Batch, observabilité, coûts, QA automatisée, catalogue d'épisodes et prépar
 
 ## État actuel
 - P0 : MERGED ✅
-- P1-A : IN PROGRESS
-- P1-B–P7 : NOT STARTED
+- P1-A : MERGED ✅
+- P1-B : IN PROGRESS
+- P2–P7 : NOT STARTED
 
 ## Next exact
-Obtenir un run CI vert sur P1-A, corriger toute défaillance, puis seulement ouvrir P1-B.
+Pousser P1-B, ouvrir la PR draft et obtenir le run CI. Si vert, P1-B devient créditable ; ensuite seulement choisir/brancher le premier adaptateur provider réel.
