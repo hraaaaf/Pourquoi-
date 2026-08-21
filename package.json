@@ -6,12 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/tests/*.test.js",
-    "p1:validate": "npm run build && node dist/pipeline/text/cli.js episodes/fixtures/p1-valid.json",
-    "p1c:live": "npm run build && node dist/pipeline/text/live-cli.js episodes/fixtures/p1-valid.json artifacts/p1c/live-bundle.json"
-  },
-  "dependencies": {
-    "openai": "^7.5.0",
-    "zod": "^4.0.0"
+    "p1:validate": "npm run build && node dist/pipeline/text/cli.js episodes/fixtures/p1-valid.json"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
