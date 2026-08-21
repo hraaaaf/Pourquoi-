@@ -12,9 +12,9 @@ REF = OUT / 'reference.jpg'
 DRIVE = OUT / 'driving.mp4'
 RESULT = OUT / 'zerogpu-smoke.mp4'
 
-W, H = 384, 480
+W, H = 320, 480
 FPS = 24
-SECONDS = 1.5
+SECONDS = 2.0
 
 
 def restore_reference():
@@ -40,12 +40,12 @@ def lerp(a, b, t):
 def pose(t):
     keys = [
         (0.00, -45, 295, 20, 10, 0.0),
-        (0.30, 190, 290, 25, 15, 0.2),
-        (0.55, 195, 286, 35, 20, 0.5),
-        (0.80, 198, 282, -35, -10, 0.75),
-        (1.15, 200, 278, -72, -6, 1.0),
-        (1.35, 200, 268, -82, -3, 1.0),
-        (1.50, 200, 278, -72, -6, 1.0),
+        (0.35, 155, 290, 25, 15, 0.2),
+        (0.70, 160, 286, 35, 20, 0.5),
+        (1.05, 163, 282, -35, -10, 0.75),
+        (1.45, 165, 278, -72, -6, 1.0),
+        (1.70, 165, 268, -82, -3, 1.0),
+        (2.00, 165, 278, -72, -6, 1.0),
     ]
     if t <= keys[0][0]:
         return keys[0][1:]
@@ -87,10 +87,10 @@ def driver_frame(t):
         d.line((a[0], a[1], b[0], b[1]), fill=(226, 70, 55), width=17)
     for p in (re, rh, le, lh):
         d.ellipse((p[0]-8, p[1]-8, p[0]+8, p[1]+8), fill=(241, 184, 139))
-    if t > 0.75:
+    if t > 1.0:
         finger = endpoint(rh, 27, right_angle - 25)
         d.line((rh[0], rh[1], finger[0], finger[1]), fill=(241, 184, 139), width=7)
-    bounce = 10 * max(0.0, 1.0 - abs(t - 1.35) / 0.20)
+    bounce = 10 * max(0.0, 1.0 - abs(t - 1.70) / 0.24)
     lk = (cx - 18, cy + 145 - bounce)
     rk = (cx + 22, cy + 145 - bounce * 0.7)
     lf = (cx - 28, 425)
@@ -122,7 +122,7 @@ def main():
         handle_file(str(REF)),
         handle_file(str(DRIVE)),
         'same cheerful young cartoon boy, red hoodie, blue jeans and red sneakers, preserve face and clothing identity, he enters frame, looks upward with curiosity, raises one arm and points upward with one finger, smooth natural full-body animation, clean neutral background',
-        1.5, 480, 384, 4, 1.0, 5.0,
+        2.0, 480, 320, 4, 1.0, 5.0,
         'distorted face, identity drift, extra limbs, extra fingers, duplicated body parts, warped hands, text, subtitles, watermark, static frame, flicker, blur',
         23,
         api_name='/animate',
