@@ -1,0 +1,48 @@
+name: P5 Final Voice
+
+on:
+  pull_request:
+    branches: [p4b4-hook-9s]
+    paths:
+      - ".github/workflows/p5-voice-final.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download final crisp narration segments
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/p5-audio
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d01bf7c4-7e19-41bd-8403-357b736a5148.mp3" -o artifacts/p5-audio/01-hook.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d244ef3e-e0f8-4148-b055-0bf5982c6e03.mp3" -o artifacts/p5-audio/02-context.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c13b806b-c5bc-4ac9-a303-d88a5a76aafc.mp3" -o artifacts/p5-audio/03-explanation.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/058ff7f6-c612-4daf-b786-70a4f6313710.mp3" -o artifacts/p5-audio/04-surprise-canonical.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6ede9804-7d5a-43a4-81a2-be50ef79b514.mp3" -o artifacts/p5-audio/05-challenge-canonical.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/60515d89-34f6-47e0-bbf2-9b1d0ebd80f2.mp3" -o artifacts/p5-audio/06-violet-aligned.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d9a1a8de-316c-48d4-a53a-390c9cc65fed.mp3" -o artifacts/p5-audio/07-sunset-aligned.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b7423bf2-1d6e-43da-a318-03a045b124e9.mp3" -o artifacts/p5-audio/08-challenge-aligned.mp3
+      - name: Validate and measure segments
+        run: |
+          set -euo pipefail
+          for f in artifacts/p5-audio/*.mp3; do
+            test -s "$f"
+            echo "=== $f ==="
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p5-final-voice-segments-crisp
+          path: artifacts/p5-audio/*.mp3
+          if-no-files-found: error
+          retention-days: 30

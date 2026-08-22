@@ -1,0 +1,62 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "version": 1,
+  "voice": {
+    "style": "crisp",
+    "providerContext": "AI Voice Generator",
+    "notes": "Canonical P1 narration retained for hook/context/explanation; violet/sunset/challenge use fact-equivalent timing adaptations to match the validated P4 visual beats."
+  },
+  "mix": {
+    "targetSeconds": 75,
+    "integratedLufsMeasured": -14.5,
+    "truePeakDbtpMeasured": -1.0,
+    "music": "pilot-ciel-bleu-music-bed.mp3",
+    "musicBehavior": "ducked under narration",
+    "sfx": "subtle whooshes at scene cuts and light pop accents"
+  },
+  "segments": [
+    {
+      "id": "hook",
+      "startSeconds": 0.45,
+      "text": "Tu lèves les yeux : le ciel est bleu. Mais pourquoi bleu ? Pourquoi pas vert, rouge ou violet ?",
+      "source": "canonical"
+    },
+    {
+      "id": "context",
+      "startSeconds": 8.15,
+      "targetWindowSeconds": 11.5,
+      "text": "Tout commence avec le Soleil. Sa lumière paraît blanche, mais elle contient en réalité toutes les couleurs de l'arc-en-ciel. Et ces couleurs n'ont pas toutes les mêmes longueurs d'onde.",
+      "source": "canonical",
+      "tempoAdjustment": 1.016
+    },
+    {
+      "id": "explanation",
+      "startSeconds": 20.2,
+      "text": "Quand la lumière entre dans notre atmosphère, elle rencontre de minuscules molécules d'air. Elles dispersent beaucoup plus facilement les couleurs aux petites longueurs d'onde, notamment le bleu. La lumière bleue part alors dans plein de directions et arrive jusqu'à tes yeux depuis presque tout le ciel.",
+      "source": "canonical"
+    },
+    {
+      "id": "violet",
+      "startSeconds": 49.0,
+      "targetWindowSeconds": 8.7,
+      "text": "Et le violet ? Lui aussi est très diffusé. Mais nos yeux y sont moins sensibles, et une partie est absorbée plus haut dans l'atmosphère. Résultat : le ciel nous paraît surtout bleu.",
+      "source": "fact-equivalent timing adaptation",
+      "factIds": ["fact-violet"],
+      "tempoAdjustment": 1.241
+    },
+    {
+      "id": "sunset",
+      "startSeconds": 58.0,
+      "text": "Au coucher du Soleil, la lumière traverse beaucoup plus d'air. Le bleu est dispersé avant d'arriver jusqu'à toi. Alors le rouge et l'orange ressortent davantage.",
+      "source": "fact-equivalent timing adaptation",
+      "factIds": ["fact-sunset"]
+    },
+    {
+      "id": "challenge",
+      "startSeconds": 69.05,
+      "text": "Mini-défi : demain, observe le coucher du Soleil. Combien de couleurs vois-tu ?",
+      "source": "fact-equivalent timing adaptation",
+      "factIds": ["fact-sunset"]
+    }
+  ]
+}
