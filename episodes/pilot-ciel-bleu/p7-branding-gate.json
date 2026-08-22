@@ -1,0 +1,48 @@
+{
+  "stage": "P7",
+  "status": "human-gate",
+  "branch": "p7-branding",
+  "episode": "pilot-ciel-bleu",
+  "brand": {
+    "displayName": "Pourquoi ?",
+    "tagline": "1 question • 1 réponse",
+    "mascot": "brown-haired boy in red hoodie"
+  },
+  "assets": {
+    "intro": {
+      "durationSeconds": 2.2,
+      "resolution": "1920x1080",
+      "fps": 24,
+      "sha256": "c207d6d070ea5de76b4e2f144d6afcb3c9e0bd56658164db55e18a44152ca683"
+    },
+    "outro": {
+      "durationSeconds": 7.0,
+      "resolution": "1920x1080",
+      "fps": 24,
+      "version": "v3",
+      "sha256": "8df40d0bfaa427f8f52273f1546d100bd19b10a2ba05766145887904ccf682d8"
+    },
+    "jingle": {
+      "durationSeconds": 2.232,
+      "format": "mp3",
+      "sha256": "de8a6f355665dbc11540e5c3d9a2054fb803edef8654a3e8532820ac14ec422a"
+    },
+    "preview": {
+      "structure": "intro -> first 3 seconds of validated episode -> outro",
+      "sha256": "22432575b3909e10b2731a738676cfa98acd3cc72cdcace2cdbac5f4e642dd70"
+    }
+  },
+  "selfGate": {
+    "introVisual": 8.5,
+    "outroVisual": 8.4,
+    "brandConsistency": 8.6,
+    "jingleTechnical": 8.3,
+    "global": 8.45
+  },
+  "rules": [
+    "episode hook remains intact after the intro bumper",
+    "same four-note motif is reused at intro and outro",
+    "no CTA or interactive placeholder may cover the mascot face",
+    "no merge until human gate"
+  ]
+}

@@ -1,0 +1,35 @@
+name: P6 Violet Voice
+
+on:
+  pull_request:
+    branches: [p4b4-hook-9s]
+    paths:
+      - ".github/workflows/p6-violet-voice.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  violet-voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download shorter crisp violet narration
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/p6-audio
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a10ec842-aafc-46fb-8e9a-b4812cf216bc.mp3" -o artifacts/p6-audio/violet-crisp-short.mp3
+          test -s artifacts/p6-audio/violet-crisp-short.mp3
+          ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 artifacts/p6-audio/violet-crisp-short.mp3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p6-violet-crisp-short
+          path: artifacts/p6-audio/violet-crisp-short.mp3
+          if-no-files-found: error
+          retention-days: 30
