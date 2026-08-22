@@ -5,6 +5,7 @@ on:
     branches: [p4b4-hook-9s]
     paths:
       - "scripts/p4b5_opening_v1.py"
+      - "scripts/p4b5_opening_v2.py"
       - ".github/workflows/p4b5-opening.yml"
       - "assets/p4b4/**"
   workflow_dispatch:
@@ -42,17 +43,17 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9465358775/zip" \
             -o /tmp/p4b3-keyframes.zip
           unzip -q /tmp/p4b3-keyframes.zip -d /tmp/p4b3-keyframes
-      - name: Render P4-B5 opening
+      - name: Render P4-B5 opening v2
         env:
           P4B4_KEYFRAMES: /tmp/p4b3-keyframes
-        run: python scripts/p4b5_opening_v1.py
+        run: python scripts/p4b5_opening_v2.py
       - name: Validate MP4
         run: |
-          test -s artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
-          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration,size -of default=nw=1 artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
+          test -s artifacts/p4b5-opening-v2/P4-B5-opening-0-4s-v2.mp4
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration,size -of default=nw=1 artifacts/p4b5-opening-v2/P4-B5-opening-0-4s-v2.mp4
       - uses: actions/upload-artifact@v4
         with:
-          name: p4b5-opening-v1
-          path: artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
+          name: p4b5-opening-v2
+          path: artifacts/p4b5-opening-v2/P4-B5-opening-0-4s-v2.mp4
           if-no-files-found: error
           retention-days: 30
