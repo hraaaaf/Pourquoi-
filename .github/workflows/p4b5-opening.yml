@@ -1,0 +1,58 @@
+name: P4-B5 Opening 0-4s
+
+on:
+  pull_request:
+    branches: [p4b4-hook-9s]
+    paths:
+      - "scripts/p4b5_opening_v1.py"
+      - ".github/workflows/p4b5-opening.yml"
+      - "assets/p4b4/**"
+  workflow_dispatch:
+
+concurrency:
+  group: p4b5-opening-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  render-opening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install render dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg unzip
+          pip install --disable-pip-version-check pillow
+      - name: Reuse validated LivePortrait keyframes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/p4b3-keyframes
+          curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9465358775/zip" \
+            -o /tmp/p4b3-keyframes.zip
+          unzip -q /tmp/p4b3-keyframes.zip -d /tmp/p4b3-keyframes
+      - name: Render P4-B5 opening
+        env:
+          P4B4_KEYFRAMES: /tmp/p4b3-keyframes
+        run: python scripts/p4b5_opening_v1.py
+      - name: Validate MP4
+        run: |
+          test -s artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration,size -of default=nw=1 artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4b5-opening-v1
+          path: artifacts/p4b5-opening-v1/P4-B5-opening-0-4s-v1.mp4
+          if-no-files-found: error
+          retention-days: 30
