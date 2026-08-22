@@ -1,0 +1,113 @@
+1
+00:00:00,450 --> 00:00:02,850
+Tu lèves les yeux :
+le ciel est bleu.
+
+2
+00:00:02,850 --> 00:00:04,000
+Mais pourquoi bleu ?
+
+3
+00:00:04,000 --> 00:00:06,300
+Pourquoi pas vert,
+rouge ou violet ?
+
+4
+00:00:08,150 --> 00:00:10,250
+Tout commence
+avec le Soleil.
+
+5
+00:00:10,250 --> 00:00:12,000
+Sa lumière paraît blanche,
+
+6
+00:00:12,000 --> 00:00:14,150
+mais elle contient en réalité
+
+7
+00:00:14,150 --> 00:00:16,450
+toutes les couleurs
+de l'arc-en-ciel.
+
+8
+00:00:16,450 --> 00:00:19,700
+Et ces couleurs n'ont pas toutes
+les mêmes longueurs d'onde.
+
+9
+00:00:20,200 --> 00:00:23,300
+Quand la lumière entre
+dans notre atmosphère,
+
+10
+00:00:23,300 --> 00:00:25,900
+elle rencontre de minuscules
+molécules d'air.
+
+11
+00:00:25,900 --> 00:00:29,250
+Elles dispersent beaucoup plus
+facilement les couleurs
+
+12
+00:00:29,250 --> 00:00:32,150
+aux petites longueurs d'onde,
+notamment le bleu.
+
+13
+00:00:32,150 --> 00:00:35,650
+La lumière bleue part alors
+dans plein de directions
+
+14
+00:00:35,650 --> 00:00:39,050
+et arrive jusqu'à tes yeux
+depuis presque tout le ciel.
+
+15
+00:00:49,000 --> 00:00:50,350
+Et le violet ?
+
+16
+00:00:50,350 --> 00:00:52,250
+Lui aussi est très diffusé.
+
+17
+00:00:52,250 --> 00:00:54,650
+Mais nos yeux y sont
+moins sensibles.
+
+18
+00:00:54,650 --> 00:00:57,500
+Résultat : le ciel nous paraît
+surtout bleu.
+
+19
+00:00:58,000 --> 00:00:59,850
+Au coucher du Soleil,
+
+20
+00:00:59,850 --> 00:01:02,250
+la lumière traverse
+beaucoup plus d'air.
+
+21
+00:01:02,250 --> 00:01:05,450
+Le bleu est dispersé
+avant d'arriver jusqu'à toi.
+
+22
+00:01:05,450 --> 00:01:08,000
+Alors le rouge et l'orange
+ressortent davantage.
+
+23
+00:01:09,050 --> 00:01:12,200
+Mini-défi : demain, observe
+le coucher du Soleil.
+
+24
+00:01:12,200 --> 00:01:13,950
+Combien de couleurs
+vois-tu ?
