@@ -1,0 +1,42 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "stage": "P5",
+  "status": "human_gate",
+  "voice": {
+    "style": "crisp",
+    "segments": [
+      {"id": "hook", "startSeconds": 0.45, "endSeconds": 6.186},
+      {"id": "context", "startSeconds": 8.15, "endSeconds": 19.654, "tempo": 1.016},
+      {"id": "explanation", "startSeconds": 20.2, "endSeconds": 38.968},
+      {"id": "violet", "startSeconds": 49.0, "endSeconds": 57.703, "tempo": 1.241},
+      {"id": "sunset", "startSeconds": 58.0, "endSeconds": 67.888},
+      {"id": "challenge", "startSeconds": 69.05, "endSeconds": 73.778}
+    ]
+  },
+  "mix": {
+    "music": "pilot-ciel-bleu-music-bed.mp3",
+    "musicBehavior": "sidechain ducked under narration",
+    "sfx": "subtle whooshes at scene cuts and light pop accents",
+    "targetIntegratedLufs": -14.5,
+    "targetTruePeakDbtp": -1.0,
+    "measuredIntegratedLufs": -14.54,
+    "measuredTruePeakDbtp": -0.98,
+    "measuredLra": 4.6
+  },
+  "master": {
+    "durationSeconds": 75.0,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  "gates": {
+    "voiceTimeline": "pass",
+    "musicDuck": "pass",
+    "sfx": "pass",
+    "loudness": "pass",
+    "clipping": "pass",
+    "human": "pending"
+  }
+}
