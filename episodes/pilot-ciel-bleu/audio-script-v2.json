@@ -1,0 +1,16 @@
+{
+  "episodeId": "pilot-ciel-bleu",
+  "version": 2,
+  "voice": {
+    "style": "crisp",
+    "notes": "P6 keeps all P5 narration timing except the violet passage, which is shortened and regenerated at normal speed to improve child comprehension and subtitle readability."
+  },
+  "segments": [
+    {"id":"hook","startSeconds":0.45,"text":"Tu lèves les yeux : le ciel est bleu. Mais pourquoi bleu ? Pourquoi pas vert, rouge ou violet ?","tempoAdjustment":1.0},
+    {"id":"context","startSeconds":8.15,"text":"Tout commence avec le Soleil. Sa lumière paraît blanche, mais elle contient en réalité toutes les couleurs de l'arc-en-ciel. Et ces couleurs n'ont pas toutes les mêmes longueurs d'onde.","tempoAdjustment":1.016},
+    {"id":"explanation","startSeconds":20.2,"text":"Quand la lumière entre dans notre atmosphère, elle rencontre de minuscules molécules d'air. Elles dispersent beaucoup plus facilement les couleurs aux petites longueurs d'onde, notamment le bleu. La lumière bleue part alors dans plein de directions et arrive jusqu'à tes yeux depuis presque tout le ciel.","tempoAdjustment":1.0},
+    {"id":"violet","startSeconds":49.0,"text":"Et le violet ? Lui aussi est très diffusé. Mais nos yeux y sont moins sensibles. Résultat : le ciel nous paraît surtout bleu.","tempoAdjustment":1.0,"providerContext":"21f0ca66328648bbb56b772931c6c28a"},
+    {"id":"sunset","startSeconds":58.0,"text":"Au coucher du Soleil, la lumière traverse beaucoup plus d'air. Le bleu est dispersé avant d'arriver jusqu'à toi. Alors le rouge et l'orange ressortent davantage.","tempoAdjustment":1.0},
+    {"id":"challenge","startSeconds":69.05,"text":"Mini-défi : demain, observe le coucher du Soleil. Combien de couleurs vois-tu ?","tempoAdjustment":1.0}
+  ]
+}
