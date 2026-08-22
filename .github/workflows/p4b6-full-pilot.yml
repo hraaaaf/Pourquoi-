@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/p4b6_full_pilot.py"
       - "scripts/p4b6_full_pilot_v2.py"
+      - "scripts/p4b6_full_pilot_v3.py"
       - ".github/workflows/p4b6-full-pilot.yml"
       - "scripts/p4b5_opening_v2.py"
       - "scripts/p4b4_hook9s_v5.py"
@@ -47,21 +48,21 @@ jobs:
             -o /tmp/p4b3-keyframes.zip
           unzip -q /tmp/p4b3-keyframes.zip -d /tmp/p4b3-keyframes
           find /tmp/p4b3-keyframes -maxdepth 4 -type f -print
-      - name: Render full 75-second pilot v2
+      - name: Render full 75-second pilot v3
         env:
           P4B4_KEYFRAMES: /tmp/p4b3-keyframes
-        run: python scripts/p4b6_full_pilot_v2.py
+        run: python scripts/p4b6_full_pilot_v3.py
       - name: Validate MP4
         run: |
-          test -s artifacts/p4b6-full-pilot-v2/P4-B6-full-pilot-75s-v2.mp4
+          test -s artifacts/p4b6-full-pilot-v3/P4-B6-full-pilot-75s-v3.mp4
           ffprobe -v error \
             -show_entries stream=codec_name,width,height,r_frame_rate \
             -show_entries format=duration,size \
             -of default=nw=1 \
-            artifacts/p4b6-full-pilot-v2/P4-B6-full-pilot-75s-v2.mp4
+            artifacts/p4b6-full-pilot-v3/P4-B6-full-pilot-75s-v3.mp4
       - uses: actions/upload-artifact@v4
         with:
-          name: p4b6-full-pilot-75s-v2
-          path: artifacts/p4b6-full-pilot-v2/P4-B6-full-pilot-75s-v2.mp4
+          name: p4b6-full-pilot-75s-v3
+          path: artifacts/p4b6-full-pilot-v3/P4-B6-full-pilot-75s-v3.mp4
           if-no-files-found: error
           retention-days: 30
