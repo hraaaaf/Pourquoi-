@@ -1,0 +1,62 @@
+name: P4-B6.1 Quality 1080p
+
+on:
+  pull_request:
+    branches: [p4b4-hook-9s]
+    paths:
+      - "scripts/p4b6_quality_1080p.py"
+      - ".github/workflows/p4b6-quality-1080p.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: p4b6-quality-1080p-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  quality-pass:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg unzip
+      - name: Fetch validated P4-B6 v4 artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9474462505/zip" \
+            -o /tmp/p4b6-v4.zip
+          unzip -q /tmp/p4b6-v4.zip -d input
+          find input -maxdepth 3 -type f -print
+      - name: Encode 1080p HQ
+        run: |
+          SRC=$(find input -type f -name '*.mp4' | head -n1)
+          test -n "$SRC"
+          python scripts/p4b6_quality_1080p.py "$SRC"
+      - name: Validate 1080p MP4
+        run: |
+          test -s artifacts/p4b6-quality-1080p/P4-B6-full-pilot-75s-v4-1080p-HQ.mp4
+          ffprobe -v error \
+            -show_entries stream=codec_name,width,height,r_frame_rate \
+            -show_entries format=duration,size,bit_rate \
+            -of default=nw=1 \
+            artifacts/p4b6-quality-1080p/P4-B6-full-pilot-75s-v4-1080p-HQ.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4b6-quality-1080p
+          path: artifacts/p4b6-quality-1080p/P4-B6-full-pilot-75s-v4-1080p-HQ.mp4
+          if-no-files-found: error
+          retention-days: 30
