@@ -1,0 +1,41 @@
+name: P5 Voice Download
+
+on:
+  pull_request:
+    branches: [p4b4-hook-9s]
+    paths:
+      - ".github/workflows/p5-voice-download.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg curl
+      - name: Download generated crisp narration
+        run: |
+          mkdir -p artifacts/p5-audio
+          curl -fL --retry 3 --retry-delay 2 \
+            "https://www.aidocmaker.com/g0/audio?name=e14e5763f3d64bc5ac6c7acc8dd6ca61" \
+            -o artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+      - name: Validate narration
+        run: |
+          test -s artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+          ffprobe -v error \
+            -show_entries format=duration,size,bit_rate \
+            -of default=nw=1 \
+            artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p5-voice-crisp
+          path: artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+          if-no-files-found: error
+          retention-days: 30
