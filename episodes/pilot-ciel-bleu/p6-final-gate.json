@@ -1,0 +1,46 @@
+{
+  "stage": "P6",
+  "episode": "pilot-ciel-bleu",
+  "status": "human-gate",
+  "changes": [
+    "violet narration shortened and regenerated in crisp at normal speed",
+    "video stream copied without re-encoding",
+    "single final AAC encode after two-pass loudness normalization",
+    "French soft subtitles plus sidecar SRT",
+    "7 chapters"
+  ],
+  "narrationTiming": [
+    {"id":"hook","start":0.45,"end":6.186,"tempo":1.0},
+    {"id":"context","start":8.15,"end":19.654,"tempo":1.016},
+    {"id":"explanation","start":20.2,"end":38.968,"tempo":1.0},
+    {"id":"violet-short","start":49.0,"end":56.44,"tempo":1.0},
+    {"id":"sunset","start":58.0,"end":67.888,"tempo":1.0},
+    {"id":"challenge","start":69.05,"end":73.778,"tempo":1.0}
+  ],
+  "loudnessMeasured": {
+    "integratedLufs": -14.55,
+    "truePeakDbtp": -1.01,
+    "lra": 6.9
+  },
+  "subtitleQA": {
+    "cueCount": 24,
+    "overlaps": 0,
+    "maxCPS": 18.8,
+    "maxLineLength": 32,
+    "maxLines": 2
+  },
+  "master": {
+    "durationSeconds": 75.0,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "subtitleCodec": "mov_text",
+    "subtitleLanguage": "fra",
+    "chapters": 7,
+    "finalSha256": "6d3219984fd0558e07cd9153a7f58f653955aea60801aa7aa587ae2ddd704a6b",
+    "cleanSha256": "d0380359ed82f5c710a6994be979ff5dd040f4c926af596034d1f1507bf31026",
+    "srtSha256": "bd26a507c3db630ba13404f88496323d5cabb4da472431a47994308747991ddc"
+  }
+}
