@@ -20,22 +20,26 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-      - name: Download final crisp narration
+      - name: Download final crisp narration segments
         run: |
+          set -euo pipefail
           mkdir -p artifacts/p5-audio
-          curl -fL --retry 3 --retry-delay 2 \
-            "https://www.aidocmaker.com/g0/audio?name=e14e5763f3d64bc5ac6c7acc8dd6ca61" \
-            -o artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
-      - name: Validate narration
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d01bf7c4-7e19-41bd-8403-357b736a5148.mp3" -o artifacts/p5-audio/01-hook.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d244ef3e-e0f8-4148-b055-0bf5982c6e03.mp3" -o artifacts/p5-audio/02-context.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c13b806b-c5bc-4ac9-a303-d88a5a76aafc.mp3" -o artifacts/p5-audio/03-explanation.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/058ff7f6-c612-4daf-b786-70a4f6313710.mp3" -o artifacts/p5-audio/04-surprise.mp3
+          curl -fL --retry 3 "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6ede9804-7d5a-43a4-81a2-be50ef79b514.mp3" -o artifacts/p5-audio/05-challenge.mp3
+      - name: Validate and measure segments
         run: |
-          test -s artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
-          ffprobe -v error \
-            -show_entries format=duration,size,bit_rate \
-            -of default=nw=1 \
-            artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+          set -euo pipefail
+          for f in artifacts/p5-audio/*.mp3; do
+            test -s "$f"
+            echo "=== $f ==="
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$f"
+          done
       - uses: actions/upload-artifact@v4
         with:
-          name: p5-final-voice-crisp
-          path: artifacts/p5-audio/pilot-ciel-bleu-voice-crisp.mp3
+          name: p5-final-voice-segments-crisp
+          path: artifacts/p5-audio/*.mp3
           if-no-files-found: error
           retention-days: 30
