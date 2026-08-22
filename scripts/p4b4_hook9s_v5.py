@@ -1,19 +1,28 @@
 from pathlib import Path
-import math, subprocess
-from PIL import Image, ImageDraw, ImageFile
+import base64, hashlib, math, subprocess
+from PIL import Image, ImageDraw
 import p4b4_hook9s_v3 as b
 
-ImageFile.LOAD_TRUNCATED_IMAGES=True
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'p4b4-hook9s-v5'; FRAMES=OUT/'frames'
 OUT.mkdir(parents=True,exist_ok=True); FRAMES.mkdir(parents=True,exist_ok=True)
 b.OUT=OUT; b.FRAMES=FRAMES
-POINTING=ROOT/'assets'/'p4b4'/'validated-pointing-scene.jpg'
+EXPECTED='4edc8c9924ef472f0de443c5b53f2ae0d46186c56f4fec32e4d7286e64025690'
+
+
+def load_pointing():
+    payload=''.join((ROOT/'assets'/'p4b4'/f'pointing.b64.{i}').read_text().strip() for i in range(5))
+    raw=base64.b64decode(payload,validate=True)
+    sha=hashlib.sha256(raw).hexdigest(); assert sha==EXPECTED,(sha,EXPECTED,len(raw))
+    p=OUT/'validated-pointing-scene.jpg'; p.write_bytes(raw)
+    im=Image.open(p).convert('RGB'); im.load(); assert im.size==(480,270),im.size
+    print('POINTING_SHA_GATE_PASS',sha,len(raw),im.size)
+    return im
 
 
 def pointing_frame(src,t):
     local=max(0,t-4.03); q=b.ease(min(1,local/.38))
-    if q < .72: z=b.lerp(1.00,1.115,b.ease(q/.72))
+    if q<.72: z=b.lerp(1.00,1.115,b.ease(q/.72))
     else: z=b.lerp(1.115,1.065,b.ease((q-.72)/.28))
     if local>.38: z=1.065+.018*b.ease(min(1,(local-.38)/1.5))+.006*math.sin(local*3.2)
     base=src.resize((b.W,b.H),Image.Resampling.LANCZOS); nw,nh=int(b.W*z),int(b.H*z)
@@ -21,7 +30,7 @@ def pointing_frame(src,t):
     drift=b.ease(min(1,local/1.65)); cx=nw/2-18*drift; cy=nh/2-8*drift
     left=int(max(0,min(nw-b.W,cx-b.W/2))); top=int(max(0,min(nh-b.H,cy-b.H/2)))
     frame=zoom.crop((left,top,left+b.W,top+b.H)).convert('RGBA'); d=ImageDraw.Draw(frame,'RGBA')
-    fx=(405/960)*nw-left; fy=(169/540)*nh-top; pulse=.5+.5*math.sin(local*10)
+    fx=(202.5/480)*nw-left; fy=(84.5/270)*nh-top; pulse=.5+.5*math.sin(local*10)
     for rr,a,w in [(18,230,5),(36,125,6),(62,55,8)]:
         r=rr*(.88+.18*pulse); d.ellipse((fx-r,fy-r,fx+r,fy+r),outline=(255,226,54,a),width=w)
     for i in range(8):
@@ -38,10 +47,7 @@ def pointing_frame(src,t):
 
 
 def main():
-    if not POINTING.exists(): raise FileNotFoundError(POINTING)
-    pointing=Image.open(POINTING); pointing.load(); pointing=pointing.convert('RGB')
-    assert pointing.size==(960,540), pointing.size
-    print('POINTING_ASSET_OK',pointing.size,POINTING.stat().st_size)
+    pointing=load_pointing()
     raw=[b.normalize(b.find('portrait.png')) if list(b.KF_ROOT.rglob('portrait.png')) else b.normalize(b.find('01-look-up.png'))]
     raw += [b.normalize(b.find(x)) for x in ['01-look-up.png','02-surprise.png','03-blink.png']]
     poses=[b.white_to_alpha(x) for x in raw]; poses.append(poses[2])
