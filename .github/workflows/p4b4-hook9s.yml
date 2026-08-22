@@ -2,7 +2,7 @@ name: P4-B4 Hook 9s
 
 on:
   pull_request:
-    branches: [main]
+    branches: [p4b3-zerogpu-smoke]
     paths:
       - "scripts/p4b4_hook9s.py"
       - ".github/workflows/p4b4-hook9s.yml"
