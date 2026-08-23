@@ -1,0 +1,205 @@
+name: P10 Voice Audio Final
+
+on:
+  push:
+    branches:
+      - p10-voice-audio-final
+    paths:
+      - .github/workflows/p10-voice-audio-final.yml
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MASTER_URL: https://at.adobe.com/tKaaAto3sVNMKzdc
+      MUSIC_URL: https://at.adobe.com/glNiel8uGzuyk5sn
+      INTRO_JINGLE_URL: https://at.adobe.com/r9IxFZJBnBqIAlsU
+      OUTRO_JINGLE_URL: https://at.adobe.com/48vP9mLayGQXYSDu
+      VOICE1_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/1947ca45-3627-4928-99f7-1cbef9a544a2.mp3
+      VOICE2_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2bfa6e9d-c603-4d86-af2b-bb56ff275a01.mp3
+      VOICE3_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c17a7288-4db0-4994-848f-9a64113a376a.mp3
+      VOICE5_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7a1861d1-f636-4a40-952c-93bff8fa4ad2.mp3
+      VOICE6_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/91420426-d8ec-4002-8732-8c149cf83bff.mp3
+      VOICE7_URL: https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/f0680f62-6e48-41f2-a416-1cbde576183a.mp3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Download validated visual master and P10 audio assets
+        run: |
+          mkdir -p assets out work
+          curl -L --fail --retry 4 --retry-delay 2 "$MASTER_URL" -o assets/master-p9.6.mp4
+          curl -L --fail --retry 4 --retry-delay 2 "$MUSIC_URL" -o assets/music-bed.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$INTRO_JINGLE_URL" -o assets/intro-jingle.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$OUTRO_JINGLE_URL" -o assets/outro-jingle.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE1_URL" -o assets/voice1.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE2_URL" -o assets/voice2.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE3_URL" -o assets/voice3.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE5_URL" -o assets/voice5.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE6_URL" -o assets/voice6.mp3
+          curl -L --fail --retry 4 --retry-delay 2 "$VOICE7_URL" -o assets/voice7.mp3
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 assets/master-p9.6.mp4
+
+      - name: Fit crisp narration to approved timings
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, math, subprocess
+          from pathlib import Path
+
+          A=Path('assets'); W=Path('work'); O=Path('out')
+          W.mkdir(exist_ok=True); O.mkdir(exist_ok=True)
+
+          # Core episode timing, before the 2.4 s intro offset.
+          # Each target preserves the approved subtitle/narrative windows.
+          segments = [
+              ('voice1.mp3', 0.450, 5.850, 'hook'),
+              ('voice2.mp3', 8.150, 11.550, 'light'),
+              ('voice3.mp3', 20.200, 18.850, 'atmosphere'),
+              ('voice5.mp3', 49.000, 8.500, 'violet'),
+              ('voice6.mp3', 58.000, 10.000, 'sunset'),
+              ('voice7.mp3', 69.050, 4.900, 'challenge'),
+          ]
+          intro_offset = 2.4
+
+          def run(cmd):
+              subprocess.run(cmd, check=True)
+
+          def duration(path):
+              return float(subprocess.check_output([
+                  'ffprobe','-v','error','-show_entries','format=duration',
+                  '-of','default=nw=1:nk=1',str(path)
+              ], text=True).strip())
+
+          def atempo_chain(factor):
+              parts=[]
+              while factor > 2.0:
+                  parts.append('atempo=2.0'); factor/=2.0
+              while factor < 0.5:
+                  parts.append('atempo=0.5'); factor/=0.5
+              parts.append(f'atempo={factor:.8f}')
+              return ','.join(parts)
+
+          fitted=[]
+          report=[]
+          for src_name, core_start, target, tag in segments:
+              src=A/src_name
+              trimmed=W/f'{tag}-trim.wav'
+              fit=W/f'{tag}-fit.wav'
+              # Remove only leading/trailing dead air; preserve expressive internal pauses.
+              run(['ffmpeg','-y','-loglevel','error','-i',str(src),
+                   '-af','silenceremove=start_periods=1:start_silence=0.03:start_threshold=-48dB:stop_periods=-1:stop_silence=0.06:stop_threshold=-48dB,aresample=48000',
+                   '-ac','2',str(trimmed)])
+              d=duration(trimmed)
+              tempo=d/target
+              af=(atempo_chain(tempo)+
+                  ',highpass=f=75,lowpass=f=16500,'
+                  'acompressor=threshold=-18dB:ratio=2.2:attack=8:release=90:makeup=1.5,'
+                  'loudnorm=I=-16.0:TP=-1.2:LRA=5,'
+                  f'apad=pad_dur={target:.3f},atrim=0:{target:.3f}')
+              run(['ffmpeg','-y','-loglevel','error','-i',str(trimmed),'-af',af,'-ar','48000','-ac','2',str(fit)])
+              fitted.append((fit, intro_offset+core_start, target, tag))
+              report.append({'tag':tag,'rawSeconds':d,'targetSeconds':target,'tempo':tempo,'fullStartSeconds':intro_offset+core_start})
+
+          # Build one voice bus at exact full-master positions.
+          args=['ffmpeg','-y','-loglevel','error']
+          for fit,_,_,_ in fitted:
+              args += ['-i',str(fit)]
+          filters=[]
+          labels=[]
+          for i,(fit,start,target,tag) in enumerate(fitted):
+              ms=round(start*1000)
+              filters.append(f'[{i}:a]adelay={ms}|{ms},volume=1.0[v{i}]')
+              labels.append(f'[v{i}]')
+          filters.append(''.join(labels)+f'amix=inputs={len(labels)}:duration=longest:normalize=0,apad,atrim=0:84.4[voice]')
+          args += ['-filter_complex',';'.join(filters),'-map','[voice]','-ar','48000','-ac','2',str(W/'voice-bus.wav')]
+          run(args)
+
+          # Voice-only listening proof.
+          run(['ffmpeg','-y','-loglevel','error','-i',str(W/'voice-bus.wav'),'-c:a','libmp3lame','-b:a','192k',str(O/'Pourquoi-P10-VOICE-CRISP-PROOF.mp3')])
+          (O/'timing-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+
+      - name: Mix music, jingles and crisp voice
+        run: |
+          ffmpeg -y -loglevel error \
+            -i assets/music-bed.mp3 \
+            -i work/voice-bus.wav \
+            -i assets/intro-jingle.mp3 \
+            -i assets/outro-jingle.mp3 \
+            -filter_complex "\
+              [0:a]aresample=48000,volume=0.105,adelay=2400|2400,apad,atrim=0:84.4[music];\
+              [1:a]aresample=48000,asplit=2[voice_sc][voice_mix];\
+              [music][voice_sc]sidechaincompress=threshold=0.020:ratio=6:attack=15:release=180[ducked];\
+              [2:a]aresample=48000,volume=0.92,apad,atrim=0:2.4[intro];\
+              [3:a]aresample=48000,volume=0.88,adelay=77400|77400,apad,atrim=0:84.4[outro];\
+              [ducked][voice_mix][intro][outro]amix=inputs=4:duration=longest:normalize=0,\
+              loudnorm=I=-14.5:TP=-1.0:LRA=7,atrim=0:84.4[aout]" \
+            -map "[aout]" -ar 48000 -ac 2 -c:a aac -b:a 192k out/P10-final-audio.m4a
+
+          ffmpeg -y -loglevel error \
+            -i assets/master-p9.6.mp4 -i out/P10-final-audio.m4a \
+            -map 0:v:0 -map 1:a:0 -map 0:s? \
+            -map_metadata 0 -map_chapters 0 \
+            -c:v copy -c:a copy -c:s copy \
+            -t 84.4 -movflags +faststart \
+            out/Pourquoi-le-ciel-est-bleu-P10-MASTER-FINAL-1080p.mp4
+
+      - name: Technical QA
+        run: |
+          ffmpeg -v warning -i out/Pourquoi-le-ciel-est-bleu-P10-MASTER-FINAL-1080p.mp4 -f null - 2> out/decode.log
+          test ! -s out/decode.log || cat out/decode.log
+          ffprobe -v error -count_frames \
+            -show_entries format=duration,size,bit_rate \
+            -show_entries stream=index,codec_type,codec_name,width,height,avg_frame_rate,nb_read_frames,sample_rate,channels:stream_tags=language,title \
+            -show_entries chapter=start_time,end_time:chapter_tags=title \
+            -of json out/Pourquoi-le-ciel-est-bleu-P10-MASTER-FINAL-1080p.mp4 > out/P10-ffprobe.json
+          ffmpeg -hide_banner -nostats -i out/Pourquoi-le-ciel-est-bleu-P10-MASTER-FINAL-1080p.mp4 -vn \
+            -af loudnorm=I=-14.5:TP=-1.0:LRA=7:print_format=json -f null - 2> out/P10-loudness.txt
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          probe=json.loads(Path('out/P10-ffprobe.json').read_text())
+          loud=Path('out/P10-loudness.txt').read_text()
+          blocks=re.findall(r'\{\s*"input_i".*?\}',loud,flags=re.S)
+          loud_obj=json.loads(blocks[-1]) if blocks else {}
+          v=next(s for s in probe['streams'] if s['codec_type']=='video')
+          a=next(s for s in probe['streams'] if s['codec_type']=='audio')
+          gate={
+            'stage':'P10',
+            'status':'human-gate',
+            'voice':'crisp',
+            'durationSeconds':float(probe['format']['duration']),
+            'resolution':[v.get('width'),v.get('height')],
+            'fps':v.get('avg_frame_rate'),
+            'audioHz':a.get('sample_rate'),
+            'loudness':loud_obj,
+            'subtitleTrack':any(s['codec_type']=='subtitle' for s in probe['streams']),
+            'timingStrategy':'scene-fitted to approved P6 subtitle windows',
+          }
+          Path('out/P10-gate.json').write_text(json.dumps(gate,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(gate,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload P10 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-voice-audio-final
+          path: |
+            out/Pourquoi-le-ciel-est-bleu-P10-MASTER-FINAL-1080p.mp4
+            out/Pourquoi-P10-VOICE-CRISP-PROOF.mp3
+            out/P10-final-audio.m4a
+            out/P10-gate.json
+            out/P10-ffprobe.json
+            out/P10-loudness.txt
+            out/timing-report.json
+          retention-days: 30
