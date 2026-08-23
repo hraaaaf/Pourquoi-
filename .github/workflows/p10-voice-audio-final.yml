@@ -6,6 +6,11 @@ on:
       - p10-voice-audio-final
     paths:
       - .github/workflows/p10-voice-audio-final.yml
+  pull_request:
+    branches:
+      - p9-full-no-character
+    paths:
+      - .github/workflows/p10-voice-audio-final.yml
 
 permissions:
   contents: read
@@ -53,14 +58,12 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import json, math, subprocess
+          import json, subprocess
           from pathlib import Path
 
           A=Path('assets'); W=Path('work'); O=Path('out')
           W.mkdir(exist_ok=True); O.mkdir(exist_ok=True)
 
-          # Core episode timing, before the 2.4 s intro offset.
-          # Each target preserves the approved subtitle/narrative windows.
           segments = [
               ('voice1.mp3', 0.450, 5.850, 'hook'),
               ('voice2.mp3', 8.150, 11.550, 'light'),
@@ -71,15 +74,9 @@ jobs:
           ]
           intro_offset = 2.4
 
-          def run(cmd):
-              subprocess.run(cmd, check=True)
-
+          def run(cmd): subprocess.run(cmd, check=True)
           def duration(path):
-              return float(subprocess.check_output([
-                  'ffprobe','-v','error','-show_entries','format=duration',
-                  '-of','default=nw=1:nk=1',str(path)
-              ], text=True).strip())
-
+              return float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1',str(path)], text=True).strip())
           def atempo_chain(factor):
               parts=[]
               while factor > 2.0:
@@ -89,42 +86,24 @@ jobs:
               parts.append(f'atempo={factor:.8f}')
               return ','.join(parts)
 
-          fitted=[]
-          report=[]
+          fitted=[]; report=[]
           for src_name, core_start, target, tag in segments:
-              src=A/src_name
-              trimmed=W/f'{tag}-trim.wav'
-              fit=W/f'{tag}-fit.wav'
-              # Remove only leading/trailing dead air; preserve expressive internal pauses.
-              run(['ffmpeg','-y','-loglevel','error','-i',str(src),
-                   '-af','silenceremove=start_periods=1:start_silence=0.03:start_threshold=-48dB:stop_periods=-1:stop_silence=0.06:stop_threshold=-48dB,aresample=48000',
-                   '-ac','2',str(trimmed)])
-              d=duration(trimmed)
-              tempo=d/target
-              af=(atempo_chain(tempo)+
-                  ',highpass=f=75,lowpass=f=16500,'
-                  'acompressor=threshold=-18dB:ratio=2.2:attack=8:release=90:makeup=1.5,'
-                  'loudnorm=I=-16.0:TP=-1.2:LRA=5,'
-                  f'apad=pad_dur={target:.3f},atrim=0:{target:.3f}')
+              src=A/src_name; trimmed=W/f'{tag}-trim.wav'; fit=W/f'{tag}-fit.wav'
+              run(['ffmpeg','-y','-loglevel','error','-i',str(src),'-af','silenceremove=start_periods=1:start_silence=0.03:start_threshold=-48dB:stop_periods=-1:stop_silence=0.06:stop_threshold=-48dB,aresample=48000','-ac','2',str(trimmed)])
+              d=duration(trimmed); tempo=d/target
+              af=(atempo_chain(tempo)+',highpass=f=75,lowpass=f=16500,acompressor=threshold=-18dB:ratio=2.2:attack=8:release=90:makeup=1.5,loudnorm=I=-16.0:TP=-1.2:LRA=5,'+f'apad=pad_dur={target:.3f},atrim=0:{target:.3f}')
               run(['ffmpeg','-y','-loglevel','error','-i',str(trimmed),'-af',af,'-ar','48000','-ac','2',str(fit)])
               fitted.append((fit, intro_offset+core_start, target, tag))
               report.append({'tag':tag,'rawSeconds':d,'targetSeconds':target,'tempo':tempo,'fullStartSeconds':intro_offset+core_start})
 
-          # Build one voice bus at exact full-master positions.
           args=['ffmpeg','-y','-loglevel','error']
-          for fit,_,_,_ in fitted:
-              args += ['-i',str(fit)]
-          filters=[]
-          labels=[]
+          for fit,_,_,_ in fitted: args += ['-i',str(fit)]
+          filters=[]; labels=[]
           for i,(fit,start,target,tag) in enumerate(fitted):
-              ms=round(start*1000)
-              filters.append(f'[{i}:a]adelay={ms}|{ms},volume=1.0[v{i}]')
-              labels.append(f'[v{i}]')
+              ms=round(start*1000); filters.append(f'[{i}:a]adelay={ms}|{ms},volume=1.0[v{i}]'); labels.append(f'[v{i}]')
           filters.append(''.join(labels)+f'amix=inputs={len(labels)}:duration=longest:normalize=0,apad,atrim=0:84.4[voice]')
           args += ['-filter_complex',';'.join(filters),'-map','[voice]','-ar','48000','-ac','2',str(W/'voice-bus.wav')]
           run(args)
-
-          # Voice-only listening proof.
           run(['ffmpeg','-y','-loglevel','error','-i',str(W/'voice-bus.wav'),'-c:a','libmp3lame','-b:a','192k',str(O/'Pourquoi-P10-VOICE-CRISP-PROOF.mp3')])
           (O/'timing-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
           PY
@@ -174,18 +153,7 @@ jobs:
           loud_obj=json.loads(blocks[-1]) if blocks else {}
           v=next(s for s in probe['streams'] if s['codec_type']=='video')
           a=next(s for s in probe['streams'] if s['codec_type']=='audio')
-          gate={
-            'stage':'P10',
-            'status':'human-gate',
-            'voice':'crisp',
-            'durationSeconds':float(probe['format']['duration']),
-            'resolution':[v.get('width'),v.get('height')],
-            'fps':v.get('avg_frame_rate'),
-            'audioHz':a.get('sample_rate'),
-            'loudness':loud_obj,
-            'subtitleTrack':any(s['codec_type']=='subtitle' for s in probe['streams']),
-            'timingStrategy':'scene-fitted to approved P6 subtitle windows',
-          }
+          gate={'stage':'P10','status':'human-gate','voice':'crisp','durationSeconds':float(probe['format']['duration']),'resolution':[v.get('width'),v.get('height')],'fps':v.get('avg_frame_rate'),'audioHz':a.get('sample_rate'),'loudness':loud_obj,'subtitleTrack':any(s['codec_type']=='subtitle' for s in probe['streams']),'timingStrategy':'scene-fitted to approved P6 subtitle windows'}
           Path('out/P10-gate.json').write_text(json.dumps(gate,ensure_ascii=False,indent=2),encoding='utf-8')
           print(json.dumps(gate,ensure_ascii=False,indent=2))
           PY
