@@ -1,0 +1,34 @@
+{
+  "stage": "P8.5",
+  "status": "human-gate",
+  "assembly": "P8.2 intro V2 + P6 core + P8.3 outro V2",
+  "brandingCharacterFree": true,
+  "episodeCoreStillContainsLegacyCharacterShots": true,
+  "timeline": {
+    "introSeconds": 2.375,
+    "episodeSeconds": 75.0,
+    "outroSeconds": 7.0,
+    "totalSeconds": 84.375,
+    "videoFrames": 2025,
+    "fps": "24/1"
+  },
+  "qa": {
+    "resolution": [1920, 1080],
+    "audioSampleRate": "48000",
+    "subtitleTrack": true,
+    "subtitleLanguage": "fra",
+    "subtitleCueCount": 24,
+    "subtitleOverlaps": 0,
+    "chapters": 9,
+    "loudnessInputLUFS": -14.27,
+    "truePeakDbTP": -1.06,
+    "criticalBoundaryFramesExtracted": 10
+  },
+  "outputs": {
+    "cleanSha256": "f922fc275972269b64df7d9762a6583dbf358016e0562895a93648f1257a8931",
+    "publicationSha256": "8977de9a3464ab25c8d8796e05f509f6988f6482b899e08411bb0494c6052c09",
+    "srtSha256": "ba1e03c7beb95f20139d5dd52e33d71827be95b4d33f01136c9a6add04f3f123",
+    "boundaryContactSheetSha256": "07b0e359253270006a238e0ffaed63623cc09687213f3607c32e982c76ddd7ad"
+  },
+  "gateNote": "P8.5 completes character-free branding intro/outro. The 75-second legacy episode core still contains character shots and therefore is not yet a fully character-free episode master."
+}
