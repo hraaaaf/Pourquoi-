@@ -1,0 +1,32 @@
+{
+  "stage": "P8.3",
+  "status": "human-gate",
+  "direction": "Atelier créatif en collage papier, 100% sans personnage",
+  "durationSeconds": 7.0,
+  "resolution": "1920x1080",
+  "fps": 24,
+  "layout": {
+    "videoZones": 2,
+    "subscribeZone": 1,
+    "stableClickWindowFromSeconds": 3.0
+  },
+  "motion": [
+    "logo collage pop",
+    "merci title strip",
+    "left video card slides in",
+    "right video card slides in",
+    "subscribe circle + CTA pop",
+    "footer settles",
+    "subtle doodle sparkles only after 3s"
+  ],
+  "audio": "same four-note identity as P8.2, softer outro reprise with paper pops",
+  "checks": {
+    "clearCTA": true,
+    "compositionClean": true,
+    "notVisuallyEmpty": true,
+    "coherentWithP8_2": true,
+    "noCharacter": true
+  },
+  "selfScore": 8.7,
+  "humanGate": false
+}
