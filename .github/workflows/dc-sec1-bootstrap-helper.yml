@@ -1,0 +1,184 @@
+name: Digital Crown SEC-1 bootstrap helper
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/dc-sec1-bootstrap.trigger"
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned crypto/API dependencies
+        run: >-
+          python -m pip install --disable-pip-version-check
+          cryptography==44.0.1 PyNaCl==1.5.0 requests==2.32.3
+
+      - name: Provision Digital Crown production signing material
+        shell: python
+        env:
+          BOOTSTRAP_TOKEN: ${{ secrets.DC_CONTROL_PLANE_BOOTSTRAP_TOKEN }}
+        run: |
+          import base64
+          import hashlib
+          import os
+          import sys
+
+          import requests
+          from cryptography.hazmat.primitives import serialization
+          from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+          from nacl.public import PublicKey, SealedBox
+
+          API = "https://api.github.com"
+          API_VERSION = "2022-11-28"
+          TARGET = "hraaaaf/-digital-crown-license-control-plane"
+          token = os.environ.get("BOOTSTRAP_TOKEN", "").strip()
+          if not token:
+              print("FAIL: bootstrap token is missing.")
+              sys.exit(3)
+
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": API_VERSION,
+          }
+
+          def call(method, path, expected, payload=None):
+              response = requests.request(
+                  method,
+                  f"{API}{path}",
+                  headers=headers,
+                  json=payload,
+                  timeout=30,
+              )
+              if response.status_code not in expected:
+                  raise RuntimeError(f"GitHub API {method} {path} returned {response.status_code}")
+              return response
+
+          def require_absent(path, label):
+              response = requests.get(f"{API}{path}", headers=headers, timeout=30)
+              if response.status_code == 200:
+                  raise RuntimeError(f"REFUSED: {label} already exists; reviewed rotation is required")
+              if response.status_code != 404:
+                  raise RuntimeError(f"Preflight for {label} returned {response.status_code}")
+
+          private_path = f"/repos/{TARGET}/actions/secrets/DIGITALCROWN_LICENSE_SIGNING_PRIVATE_KEY_B64URL"
+          kid_path = f"/repos/{TARGET}/actions/variables/DIGITALCROWN_LICENSE_SIGNING_KEY_ID"
+          public_path = f"/repos/{TARGET}/actions/variables/DIGITALCROWN_LICENSE_SIGNING_PUBLIC_KEY_B64URL"
+          bootstrap_path = f"/repos/{TARGET}/actions/secrets/DC_CONTROL_PLANE_BOOTSTRAP_TOKEN"
+
+          try:
+              require_absent(private_path, "production private signing secret")
+              require_absent(kid_path, "production signing key id")
+              require_absent(public_path, "production public signing key")
+          except Exception as exc:
+              print(f"FAIL: {exc}")
+              sys.exit(4)
+
+          private_key = Ed25519PrivateKey.generate()
+          private_raw = private_key.private_bytes(
+              encoding=serialization.Encoding.Raw,
+              format=serialization.PrivateFormat.Raw,
+              encryption_algorithm=serialization.NoEncryption(),
+          )
+          public_raw = private_key.public_key().public_bytes(
+              encoding=serialization.Encoding.Raw,
+              format=serialization.PublicFormat.Raw,
+          )
+          if len(private_raw) != 32 or len(public_raw) != 32:
+              print("FAIL: generated Ed25519 raw keys are not 32 bytes.")
+              sys.exit(5)
+
+          probe = b"digital-crown-sec1-production-key-bootstrap-v2"
+          private_key.public_key().verify(private_key.sign(probe), probe)
+
+          b64url = lambda data: base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
+          private_value = b64url(private_raw)
+          public_value = b64url(public_raw)
+          kid = "dc-prod-" + hashlib.sha256(public_raw).hexdigest()[:16]
+
+          created_private = False
+          created_kid = False
+          created_public = False
+          try:
+              key_meta = call(
+                  "GET",
+                  f"/repos/{TARGET}/actions/secrets/public-key",
+                  {200},
+              ).json()
+              repo_public_key = PublicKey(base64.b64decode(key_meta["key"]))
+              encrypted_private = base64.b64encode(
+                  SealedBox(repo_public_key).encrypt(private_value.encode("utf-8"))
+              ).decode("ascii")
+
+              call(
+                  "PUT",
+                  private_path,
+                  {201},
+                  {
+                      "encrypted_value": encrypted_private,
+                      "key_id": key_meta["key_id"],
+                  },
+              )
+              created_private = True
+
+              call(
+                  "POST",
+                  f"/repos/{TARGET}/actions/variables",
+                  {201},
+                  {"name": "DIGITALCROWN_LICENSE_SIGNING_KEY_ID", "value": kid},
+              )
+              created_kid = True
+
+              call(
+                  "POST",
+                  f"/repos/{TARGET}/actions/variables",
+                  {201},
+                  {
+                      "name": "DIGITALCROWN_LICENSE_SIGNING_PUBLIC_KEY_B64URL",
+                      "value": public_value,
+                  },
+              )
+              created_public = True
+
+              secret_meta = call("GET", private_path, {200}).json()
+              kid_meta = call("GET", kid_path, {200}).json()
+              public_meta = call("GET", public_path, {200}).json()
+              if secret_meta.get("name") != "DIGITALCROWN_LICENSE_SIGNING_PRIVATE_KEY_B64URL":
+                  raise RuntimeError("private signing secret metadata readback mismatch")
+              if kid_meta.get("value") != kid or public_meta.get("value") != public_value:
+                  raise RuntimeError("public signing metadata readback mismatch")
+
+              call("DELETE", bootstrap_path, {204})
+          except Exception as exc:
+              print(f"FAIL: provisioning transaction failed: {exc}")
+              for path, created in (
+                  (public_path, created_public),
+                  (kid_path, created_kid),
+                  (private_path, created_private),
+              ):
+                  if created:
+                      try:
+                          call("DELETE", path, {204})
+                      except Exception:
+                          print(f"WARN: rollback failed for {path.rsplit('/', 1)[-1]}")
+              sys.exit(6)
+
+          print("PASS: production Ed25519 keypair generated and self-tested.")
+          print("PASS: private key encrypted directly into private control-plane Actions Secrets.")
+          print("PASS: production metadata readback matched.")
+          print("PASS: control-plane bootstrap token secret removed.")
+          print(f"DIGITALCROWN_LICENSE_SIGNING_KEY_ID={kid}")
+          print(f"DIGITALCROWN_LICENSE_SIGNING_PUBLIC_KEY_B64URL={public_value}")
+          print("Private signing key value was never printed or stored as an artifact.")
